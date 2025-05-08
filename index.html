@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>喵星人生活性价比计算器</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background: #FFF5F5;
+            color: #333;
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .container {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        h1 {
+            color: #FF6B6B;
+            text-align: center;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+        }
+        select, input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        button {
+            background: #FF6B6B;
+            color: white;
+            border: none;
+            padding: 12px 20px;
+            border-radius: 5px;
+            width: 100%;
+            font-size: 16px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        .result {
+            margin-top: 20px;
+            padding: 15px;
+            background: #F8F9FA;
+            border-radius: 10px;
+            display: none;
+        }
+        .cat-img {
+            width: 100%;
+            border-radius: 10px;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🐱 喵星人生活性价比计算器</h1>
+        
+        <div class="form-group">
+            <label for="catType">猫咪类型</label>
+            <select id="catType">
+                <option value="cloud">云养猫（无实体猫）</option>
+                <option value="domestic">中华田园猫</option>
+                <option value="british">英国短毛猫</option>
+                <option value="ragdoll">布偶猫</option>
+                <option value="siamese">暹罗猫</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="yearlyCost">年花费（元）</label>
+            <input type="number" id="yearlyCost" placeholder="请输入年度养猫总花费">
+        </div>
+
+        <div class="form-group">
+            <label for="interactionDays">每周互动天数</label>
+            <select id="interactionDays">
+                <option value="7">每天</option>
+                <option value="5">工作日</option>
+                <option value="3">偶尔</option>
+                <option value="1">很少</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="dailyTime">日均互动时间（小时）</label>
+            <input type="number" id="dailyTime" value="1" min="0" max="24">
+        </div>
+
+        <div class="form-group">
+            <label for="catMood">猫咪性格</label>
+            <select id="catMood">
+                <option value="1.2">高冷傲娇</option>
+                <option value="1.0">普通乖巧</option>
+                <option value="0.8">粘人精</option>
+                <option value="0.6">拆家狂魔</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="livingCity">所在城市</label>
+            <select id="livingCity">
+                <option value="1.2">一线城市</option>
+                <option value="1.0">新一线城市</option>
+                <option value="0.9">二线城市</option>
+                <option value="0.8">三四线</option>
+                <option value="0.7">县城/乡镇</option>
+            </select>
+        </div>
+
+        <div class="form-group">
+            <label for="homeType">居住环境</label>
+            <select id="homeType">
+                <option value="1.2">大平层/别墅</option>
+                <option value="1.0">普通住宅</option>
+                <option value="0.8">合租房间</option>
+                <option value="0.6">宿舍/狭小空间</option>
+            </select>
+        </div>
+
+        <button onclick="calculate()">计算喵生性价比</button>
+
+        <div id="result" class="result">
+            <h2>你的喵生性价比得分: <span id="score">0</span></h2>
+            <img id="catImage" class="cat-img" src="" alt="猫咪图片">
+            <p id="resultText"></p>
+        </div>
+    </div>
+
+    <script>
+        function calculate() {
+            // 获取输入值
+            const catType = document.getElementById('catType').value;
+            const yearlyCost = parseFloat(document.getElementById('yearlyCost').value) || 0;
+            const interactionDays = parseFloat(document.getElementById('interactionDays').value);
+            const dailyTime = parseFloat(document.getElementById('dailyTime').value);
+            const catMood = parseFloat(document.getElementById('catMood').value);
+            const livingCity = parseFloat(document.getElementById('livingCity').value);
+            const homeType = parseFloat(document.getElementById('homeType').value);
+
+            // 计算年度互动天数 (52周 * 每周互动天数)
+            const annualInteractionDays = 52 * (interactionDays / 7);
+
+            // 计算日均互动价值系数 (时间越长价值越高)
+            const timeValue = Math.min(dailyTime / 2, 1.5); // 最大1.5倍
+
+            // 基础公式: (情感价值 * 环境系数) / (成本/互动天数)
+            const score = (catMood * livingCity * homeType * timeValue * 1000) / (yearlyCost / annualInteractionDays);
+
+            // 显示结果
+            document.getElementById('score').textContent = score.toFixed(2);
+            document.getElementById('result').style.display = 'block';
+
+            // 根据分数显示不同评价
+            let resultText = '';
+            let catImage = '';
+            
+            if (score > 2.0) {
+                resultText = '🐱🌟 神仙喵生！你的猫咪生活性价比超高，简直是猫中贵族！';
+                catImage = 'https://cdn.pixabay.com/photo/2017/07/25/01/22/cat-2536662_640.jpg';
+            } else if (score > 1.5) {
+                resultText = '🐱💖 优质喵生！你和猫咪相处得很舒适，继续保持～';
+                catImage = 'https://cdn.pixabay.com/photo/2015/11/16/22/14/cat-1046544_640.jpg';
+            } else if (score > 1.0) {
+                resultText = '🐱👍 还不错！猫咪生活性价比尚可，但还有提升空间。';
+                catImage = 'https://cdn.pixabay.com/photo/2014/04/13/20/49/cat-323262_640.jpg';
+            } else if (score > 0.5) {
+                resultText = '🐱😐 勉强及格！猫咪生活性价比一般，考虑优化养猫方式。';
+                catImage = 'https://cdn.pixabay.com/photo/2018/01/28/12/37/cat-3113513_640.jpg';
+            } else {
+                resultText = '🐱💔 惨不忍睹！猫咪生活性价比太低，建议重新规划养猫方案。';
+                catImage = 'https://cdn.pixabay.com/photo/2016/09/05/21/37/cat-1647775_640.jpg';
+            }
+
+            document.getElementById('resultText').textContent = resultText;
+            document.getElementById('catImage').src = catImage;
+        }
+    </script>
+</body>
+</html>
