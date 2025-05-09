@@ -138,53 +138,68 @@
     </div>
 
     <script>
-        function calculate() {
-            // 获取输入值
-            const catType = document.getElementById('catType').value;
-            const yearlyCost = parseFloat(document.getElementById('yearlyCost').value) || 0;
-            const interactionDays = parseFloat(document.getElementById('interactionDays').value);
-            const dailyTime = parseFloat(document.getElementById('dailyTime').value);
-            const catMood = parseFloat(document.getElementById('catMood').value);
-            const livingCity = parseFloat(document.getElementById('livingCity').value);
-            const homeType = parseFloat(document.getElementById('homeType').value);
+      function calculate() {
+    // 获取输入值
+    const catType = document.getElementById('catType').value;
+    const yearlyCost = parseFloat(document.getElementById('yearlyCost').value) || 0;
+    const interactionDays = parseFloat(document.getElementById('interactionDays').value);
+    const dailyTime = parseFloat(document.getElementById('dailyTime').value);
+    const catMood = parseFloat(document.getElementById('catMood').value);
+    const livingCity = parseFloat(document.getElementById('livingCity').value);
+    const homeType = parseFloat(document.getElementById('homeType').value);
 
-            // 计算年度互动天数 (52周 * 每周互动天数)
-            const annualInteractionDays = 52 * (interactionDays / 7);
+    // 基准参数
+    const baseYearlyCost = 5000;
+    const baseInteractionDays = 5;
+    const baseDailyTime = 2;
+    const baseCatMood = 1.0;
+    const baseLivingCity = 1.2;
+    const baseHomeType = 1.0;
 
-            // 计算日均互动价值系数 (时间越长价值越高)
-            const timeValue = Math.min(dailyTime / 2, 1.5); // 最大1.5倍
+    // 用户互动时间总量
+    const annualInteractionDays = 52 * interactionDays;
+    const totalUserInteractionTime = annualInteractionDays * dailyTime;
 
-            // 基础公式: (情感价值 * 环境系数) / (成本/互动天数)
-            const score = (catMood * livingCity * homeType * timeValue * 1000) / (yearlyCost / annualInteractionDays);
+    // 基准互动时间总量
+    const baseAnnualInteractionDays = 52 * baseInteractionDays;
+    const totalBaseInteractionTime = baseAnnualInteractionDays * baseDailyTime;
 
-            // 显示结果
-            document.getElementById('score').textContent = score.toFixed(2);
-            document.getElementById('result').style.display = 'block';
+    // 性价比计算
+    const userValue = catMood * livingCity * homeType * totalUserInteractionTime;
+    const baseValue = baseCatMood * baseLivingCity * baseHomeType * totalBaseInteractionTime;
 
-            // 根据分数显示不同评价
-            let resultText = '';
-            let catImage = '';
-            
-            if (score > 2.0) {
-                resultText = '🐱🌟 神仙喵生！你的猫咪生活性价比超高，简直是猫中贵族！';
-                catImage = 'https://cdn.pixabay.com/photo/2017/07/25/01/22/cat-2536662_640.jpg';
-            } else if (score > 1.5) {
-                resultText = '🐱💖 优质喵生！你和猫咪相处得很舒适，继续保持～';
-                catImage = 'https://cdn.pixabay.com/photo/2015/11/16/22/14/cat-1046544_640.jpg';
-            } else if (score > 1.0) {
-                resultText = '🐱👍 还不错！猫咪生活性价比尚可，但还有提升空间。';
-                catImage = 'https://cdn.pixabay.com/photo/2014/04/13/20/49/cat-323262_640.jpg';
-            } else if (score > 0.5) {
-                resultText = '🐱😐 勉强及格！猫咪生活性价比一般，考虑优化养猫方式。';
-                catImage = 'https://cdn.pixabay.com/photo/2018/01/28/12/37/cat-3113513_640.jpg';
-            } else {
-                resultText = '🐱💔 惨不忍睹！猫咪生活性价比太低，建议重新规划养猫方案。';
-                catImage = 'https://cdn.pixabay.com/photo/2016/09/05/21/37/cat-1647775_640.jpg';
-            }
+    const costRatio = yearlyCost / baseYearlyCost;
 
-            document.getElementById('resultText').textContent = resultText;
-            document.getElementById('catImage').src = catImage;
-        }
+    const score = (userValue / costRatio) / baseValue;
+
+    // 显示结果
+    document.getElementById('score').textContent = score.toFixed(2);
+    document.getElementById('result').style.display = 'block';
+
+    // 结果文案和图片
+    let resultText = '';
+    let catImage = '';
+
+    if (score > 1.5) {
+        resultText = '🐱🌟 神仙喵生！你的猫咪生活性价比超高，简直是猫中贵族！';
+        catImage = 'https://cdn.pixabay.com/photo/2017/07/25/01/22/cat-2536662_640.jpg';
+    } else if (score > 1.2) {
+        resultText = '🐱💖 优质喵生！你和猫咪相处得很舒适，继续保持～';
+        catImage = 'https://cdn.pixabay.com/photo/2015/11/16/22/14/cat-1046544_640.jpg';
+    } else if (score > 1.0) {
+        resultText = '🐱👍 还不错！猫咪生活性价比尚可，但还有提升空间。';
+        catImage = 'https://cdn.pixabay.com/photo/2014/04/13/20/49/cat-323262_640.jpg';
+    } else if (score > 0.8) {
+        resultText = '🐱😐 勉强及格！猫咪生活性价比一般，考虑优化养猫方式。';
+        catImage = 'https://cdn.pixabay.com/photo/2018/01/28/12/37/cat-3113513_640.jpg';
+    } else {
+        resultText = '🐱💔 惨不忍睹！猫咪生活性价比太低，建议重新规划养猫方案。';
+        catImage = 'https://cdn.pixabay.com/photo/2016/09/05/21/37/cat-1647775_640.jpg';
+    }
+
+    document.getElementById('resultText').textContent = resultText;
+    document.getElementById('catImage').src = catImage;
+}
     </script>
 </body>
 </html>
