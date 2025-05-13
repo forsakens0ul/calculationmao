@@ -3,203 +3,1101 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>喵星人生活性价比计算器</title>
+    <title>喵星人生活性价比计算器Pro</title>
+    <!-- 添加 Font Awesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
     <style>
+        :root {
+            --primary: #FF6B6B;
+            --secondary: #FFD166;
+            --dark: #6D4C3D;
+            --light: #FFF5F5;
+        }
+        .social-links {
+        color: var(--primary); /* 使用背景色变量 */
+    }
+    .social-links a {
+        color: inherit; /* 继承父元素颜色 */
+    }
         body {
-            font-family: 'Arial', sans-serif;
-            background: #FFF5F5;
-            color: #333;
-            max-width: 600px;
+            font-family: 'Helvetica Neue', Arial, sans-serif;
+            background: var(--light);
+            color: var(--dark);
+            max-width: 800px;
             margin: 0 auto;
             padding: 20px;
+            line-height: 1.6;
         }
         .container {
             background: white;
-            border-radius: 15px;
-            padding: 20px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            border-radius: 20px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
         h1 {
-            color: #FF6B6B;
+            color: var(--primary);
             text-align: center;
+            margin-bottom: 30px;
+            font-size: 2.2em;
+        }
+        h2 {
+            color: var(--primary);
+            border-bottom: 2px dashed var(--secondary);
+            padding-bottom: 8px;
+            margin-top: 30px;
+        }
+        .form-section {
+            background: rgba(255,214,102,0.1);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
         }
         .form-group {
             margin-bottom: 15px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
         }
         label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
+            flex: 1 1 200px;
+            margin-bottom: 8px;
+            font-weight: 600;
         }
         select, input {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
+            flex: 2 1 300px;
+            padding: 12px;
+            border: 2px solid #eee;
+            border-radius: 8px;
+            background: white;
+            transition: all 0.3s;
+            height: 48px; /* 统一高度 */
+    box-sizing: border-box; /* 确保 padding 包含在高度内 */
+    font-size: 16px; /* 统一字体大小 */
+        }
+        select:focus, input:focus {
+            border-color: var(--secondary);
+            outline: none;
+            box-shadow: 0 0 0 3px rgba(255,214,102,0.3);
         }
         button {
-            background: #FF6B6B;
+            background: var(--primary);
             color: white;
             border: none;
-            padding: 12px 20px;
-            border-radius: 5px;
-            width: 100%;
-            font-size: 16px;
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-size: 18px;
             cursor: pointer;
-            margin-top: 10px;
+            margin: 30px auto;
+            display: block;
+            width: 80%;
+            max-width: 400px;
+            transition: all 0.3s;
+            font-weight: bold;
+        }
+        button:hover {
+            background: #FF5252;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(255,107,107,0.3);
         }
         .result {
-            margin-top: 20px;
-            padding: 15px;
-            background: #F8F9FA;
-            border-radius: 10px;
-            display: none;
+        margin-top: 40px;
+        padding: 25px;
+        background: linear-gradient(135deg, #FFF5F5 0%, #FFFAF0 100%);
+        border-radius: 15px;
+        border: 2px dashed var(--primary);
+        
+        z-index: 999; /* 确保显示在最上层 */
+        position: relative; /* 配合 z-index 使用 */
+        overflow: auto; /* 内容溢出时显示滚动条 */
         }
         .cat-img {
             width: 100%;
+            max-width: 400px;
+            border-radius: 15px;
+            margin: 20px auto;
+            display: block;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .score-display {
+            font-size: 3em;
+            color: var(--primary);
+            text-align: center;
+            margin: 20px 0;
+            font-weight: bold;
+        }
+        .cost-details {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-top: 20px;
+        }
+        .cost-item {
+            flex: 1 1 200px;
+            background: white;
+            padding: 15px;
             border-radius: 10px;
-            margin: 10px 0;
+            box-shadow: 0 3px 10px rgba(0,0,0,0.05);
+        }
+        @media (max-width: 600px) {
+            .form-group {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            label, select, input {
+                flex: 1 1 100%;
+                width: 100%;
+            }
         }
     </style>
 </head>
+<!-- 在body标签中添加id="app" -->
 <body>
-    <div class="container">
-        <h1>🐱 喵星人生活性价比计算器</h1>
+    <div id="app" class="container">
+    
+        <h1 data-translate="title">🐱 喵星人生活性价比计算器Pro</h1>
         
-        <div class="form-group">
-            <label for="catType">猫咪类型</label>
-            <select id="catType">
-                <option value="cloud">云养猫（无实体猫）</option>
-                <option value="domestic">中华田园猫</option>
-                <option value="british">英国短毛猫</option>
-                <option value="ragdoll">布偶猫</option>
-                <option value="siamese">暹罗猫</option>
-            </select>
+        <!-- 社交链接、语言选择器和统计信息 -->
+        <div style="margin-bottom: 20px;">
+           
+            
+            <div class="language-selector" style="text-align: center; margin-bottom:10px;">
+                <select v-model="language">
+                    <option value="zh">中文</option>
+                    <option value="en">English</option>
+                    <option value="ja">日本語</option>
+                </select>
+            </div>
+            
+            <!-- 修改统计信息部分 -->
+            <div class="stats" style="text-align: center;margin-bottom: 10px;">
+            {{ translations[language].visits }}: {{ visitCount }} | 
+            {{ translations[language].visitors }}: {{ visitorCount }}
+            </div>
+            <div class="social-links" style="text-align: center; margin-bottom: 10px;">
+                <a href="https://github.com/forsakens0ul/mimi" target="_blank" title="GitHub"><i class="fab fa-github"></i></a>
+                <a href="https://www.xiaohongshu.com/user/profile/5f3e9111000000000100b89e?xsec_token=YBPzuETgXi0DFdhOoF6T33ndGWLB1r2wMnk0_CaV4aBtE%3D&xsec_source=app_share&xhsshare=CopyLink&appuid=5f3e9111000000000100b89e&apptime=1746690135&share_id=5872be52bc044c3caab0aff4e24944eb&share_channel=copy_link" 
+                   target="_blank" title="小红书"><i class="fas fa-book"></i></a>
+                <a href="#" @click="showHistory = !showHistory" title="历史记录"><i class="fas fa-history"></i></a>
+            </div>
+            <div class="star-prompt" style="text-align: center;">
+                <i class="fas fa-star" style="color:#FFD700;"></i> {{ translations[language].ifUseful }}
+            </div>
+           
+            <!-- 历史记录 -->
+            <div v-if="showHistory && testHistory.length > 0" style="margin-top:10px;">
+                <h3>{{ translations[language].history }}</h3>
+                <div v-for="(item, index) in testHistory" :key="index" class="history-item">
+                    <p><strong>{{ item.date }}</strong> - {{ item.catName }}</p>
+                    <button class="btn" @click="viewHistoryResult(index)" style="padding:5px 10px;font-size:12px;">查看详情</button>
+                </div>
+            </div>
+        </div>
+        
+        
+        <!-- 猫咪基本信息 -->
+        <div class="form-section">
+            <h2 data-translate="catProfile">{{ translations[language].catProfile }}</h2>
+            <div class="form-group">
+                <label for="catType" data-translate="catBreed">{{ translations[language].catBreed }}</label>
+                <select id="catType">
+                    <option value="0" data-translate="cloudCat">{{ translations[language].cloudCat }}</option>
+                    <optgroup :label="translations[language].commonBreeds">
+                        <option value="1.0" data-translate="chineseDomesticCat">{{ translations[language].chineseDomesticCat }}</option>
+                        <option value="1.2" data-translate="britishShorthair">{{ translations[language].britishShorthair }}</option>
+                        <option value="1.5" data-translate="americanShorthair">{{ translations[language].americanShorthair }}</option>
+                        <option value="1.8" data-translate="ragdoll">{{ translations[language].ragdoll }}</option>
+                        <option value="1.7" data-translate="siamese">{{ translations[language].siamese }}</option>
+                        <option value="1.3" data-translate="scottishFold">{{ translations[language].scottishFold }}</option>
+                    </optgroup>
+                    <optgroup :label="translations[language].rareBreeds">
+                        <option value="2.0" data-translate="maineCoon">{{ translations[language].maineCoon }}</option>
+                        <option value="2.2" data-translate="norwegianForestCat">{{ translations[language].norwegianForestCat }}</option>
+                        <option value="2.5" data-translate="bengal">{{ translations[language].bengal }}</option>
+                        <option value="3.0" data-translate="savannah">{{ translations[language].savannah }}</option>
+                    </optgroup>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="catAge" data-translate="catAge">{{ translations[language].catAge }}</label>
+                <select id="catAge">
+                    <option value="1.2" data-translate="kitten">{{ translations[language].kitten }}</option>
+                    <option value="1.0" selected data-translate="adultCat">{{ translations[language].adultCat }}</option>
+                    <option value="0.8" data-translate="seniorCat">{{ translations[language].seniorCat }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="catGender" data-translate="catGender">{{ translations[language].catGender }}</label>
+                <select id="catGender">
+                    <option value="1.0" data-translate="maleNeutered">{{ translations[language].maleNeutered }}</option>
+                    <option value="1.1" data-translate="maleIntact">{{ translations[language].maleIntact }}</option>
+                    <option value="1.0" data-translate="femaleNeutered">{{ translations[language].femaleNeutered }}</option>
+                    <option value="1.2" data-translate="femaleIntact">{{ translations[language].femaleIntact }}</option>
+                </select>
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="yearlyCost">年花费（元）</label>
-            <input type="number" id="yearlyCost" placeholder="请输入年度养猫总花费">
+        <div class="form-section">
+            <h2 data-translate="purchaseCostTitle">💰 {{ translations[language].purchaseCostTitle }}</h2>
+            <div class="form-group">
+                <label for="purchaseCost" data-translate="purchaseCostLabel">{{ translations[language].purchaseCostLabel }}</label>
+                <input type="number" id="purchaseCost" value="0" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="initialSupplies" data-translate="initialSuppliesLabel">{{ translations[language].initialSuppliesLabel }}</label>
+                <input type="number" id="initialSupplies" value="300" min="0">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="interactionDays">每周互动天数</label>
-            <select id="interactionDays">
-                <option value="7">每天</option>
-                <option value="5">工作日</option>
-                <option value="3">偶尔</option>
-                <option value="1">很少</option>
-            </select>
+        <div class="form-section">
+            <h2 data-translate="dailyFeedingTitle">🍗 {{ translations[language].dailyFeedingTitle }}</h2>
+            <div class="form-group">
+                <label for="foodGrade" data-translate="foodGradeLabel">{{ translations[language].foodGradeLabel }}</label>
+                <select id="foodGrade">
+                    <option value="0.5" data-translate="foodGradeBasic">{{ translations[language].foodGradeBasic }}</option>
+                    <option value="1.0" selected data-translate="foodGradeMid">{{ translations[language].foodGradeMid }}</option>
+                    <option value="1.5" data-translate="foodGradeHigh">{{ translations[language].foodGradeHigh }}</option>
+                    <option value="2.0" data-translate="foodGradePremium">{{ translations[language].foodGradePremium }}</option>
+                    <option value="3.0" data-translate="foodGradeRaw">{{ translations[language].foodGradeRaw }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="monthlyFoodCost" data-translate="monthlyFoodCostLabel">{{ translations[language].monthlyFoodCostLabel }}</label>
+                <input type="number" id="monthlyFoodCost" value="200" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="snackGrade" data-translate="snackGradeLabel">{{ translations[language].snackGradeLabel }}</label>
+                <select id="snackGrade">
+                    <option value="0" data-translate="snackGradeNone">{{ translations[language].snackGradeNone }}</option>
+                    <option value="0.5" selected data-translate="snackGradeNormal">{{ translations[language].snackGradeNormal }}</option>
+                    <option value="1.0" data-translate="snackGradeHigh">{{ translations[language].snackGradeHigh }}</option>
+                    <option value="1.5" data-translate="snackGradePremium">{{ translations[language].snackGradePremium }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="monthlySnackCost" data-translate="monthlySnackCostLabel">{{ translations[language].monthlySnackCostLabel }}</label>
+                <input type="number" id="monthlySnackCost" value="50" min="0">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="dailyTime">日均互动时间（小时）</label>
-            <input type="number" id="dailyTime" value="1" min="0" max="24">
+        <!-- 医疗健康 -->
+        <div class="form-section">
+            <h2 data-translate="medicalHealthTitle">🏥 {{ translations[language].medicalHealthTitle }}</h2>
+            <div class="form-group">
+                <label for="vaccineCost" data-translate="vaccineCostLabel">{{ translations[language].vaccineCostLabel }}</label>
+                <input type="number" id="vaccineCost" value="500" min="0">
+            </div>
+            
+            <div class="form-group">
+                <label for="insurance" data-translate="insuranceLabel">{{ translations[language].insuranceLabel }}</label>
+                <select id="insurance">
+                    <option value="0" data-translate="insuranceNone">{{ translations[language].insuranceNone }}</option>
+                    <option value="0.8" data-translate="insuranceBasic">{{ translations[language].insuranceBasic }}</option>
+                    <option value="1.5" data-translate="insuranceComprehensive">{{ translations[language].insuranceComprehensive }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="medicalCost" data-translate="medicalCostLabel">{{ translations[language].medicalCostLabel }}</label>
+                <input type="number" id="medicalCost" value="1000" min="0">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="catMood">猫咪性格</label>
-            <select id="catMood">
-                <option value="1.2">高冷傲娇</option>
-                <option value="1.0">普通乖巧</option>
-                <option value="0.8">粘人精</option>
-                <option value="0.6">拆家狂魔</option>
-            </select>
+        <!-- 美容护理 -->
+        <div class="form-section">
+            <h2 data-translate="groomingTitle">💅 {{ translations[language].groomingTitle }}</h2>
+            <div class="form-group">
+                <label for="groomingFrequency" data-translate="groomingFrequencyLabel">{{ translations[language].groomingFrequencyLabel }}</label>
+                <select id="groomingFrequency">
+                    <option value="0" data-translate="groomingNone">{{ translations[language].groomingNone }}</option>
+                    <option value="0.5" selected data-translate="groomingOccasional">{{ translations[language].groomingOccasional }}</option>
+                    <option value="1.0" data-translate="groomingRegular">{{ translations[language].groomingRegular }}</option>
+                    <option value="1.5" data-translate="groomingFrequent">{{ translations[language].groomingFrequent }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="groomingCost" data-translate="groomingCostLabel">{{ translations[language].groomingCostLabel }}</label>
+                <input type="number" id="groomingCost" value="100" min="0">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="livingCity">所在城市</label>
-            <select id="livingCity">
-                <option value="1.2">一线城市</option>
-                <option value="1.0">新一线城市</option>
-                <option value="0.9">二线城市</option>
-                <option value="0.8">三四线</option>
-                <option value="0.7">县城/乡镇</option>
-            </select>
+        <!-- 日常用品 -->
+        <div class="form-section">
+            <h2 data-translate="dailySuppliesTitle">🛍️ {{ translations[language].dailySuppliesTitle }}</h2>
+            <div class="form-group">
+                <label for="litterGrade" data-translate="litterGradeLabel">{{ translations[language].litterGradeLabel }}</label>
+                <select id="litterGrade">
+                    <option value="0.5" data-translate="litterBasic">{{ translations[language].litterBasic }}</option>
+                    <option value="1.0" selected data-translate="litterMid">{{ translations[language].litterMid }}</option>
+                    <option value="1.5" data-translate="litterPremium">{{ translations[language].litterPremium }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="toyBudget" data-translate="toyBudgetLabel">{{ translations[language].toyBudgetLabel }}</label>
+                <input type="number" id="toyBudget" value="300" min="0">
+            </div>
         </div>
 
-        <div class="form-group">
-            <label for="homeType">居住环境</label>
-            <select id="homeType">
-                <option value="1.2">大平层/别墅</option>
-                <option value="1.0">普通住宅</option>
-                <option value="0.8">合租房间</option>
-                <option value="0.6">宿舍/狭小空间</option>
-            </select>
+        <!-- 互动情况 -->
+        <div class="form-section">
+            <h2 data-translate="interactionTitle">💖 {{ translations[language].interactionTitle }}</h2>
+            <div class="form-group">
+                <label for="dailyInteraction" data-translate="dailyInteractionLabel">{{ translations[language].dailyInteractionLabel }}</label>
+                <input type="number" id="dailyInteraction" value="2" min="0" max="24" step="0.5">
+            </div>
+            
+            <div class="form-group">
+                <label for="interactionQuality" data-translate="interactionQualityLabel">{{ translations[language].interactionQualityLabel }}</label>
+                <select id="interactionQuality">
+                    <option value="0.5" data-translate="interactionBasic">{{ translations[language].interactionBasic }}</option>
+                    <option value="1.0" selected data-translate="interactionNormal">{{ translations[language].interactionNormal }}</option>
+                    <option value="1.5" data-translate="interactionHigh">{{ translations[language].interactionHigh }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="catMood" data-translate="catMoodLabel">{{ translations[language].catMoodLabel }}</label>
+                <select id="catMood">
+                    <option value="0.8" data-translate="catMoodCold">{{ translations[language].catMoodCold }}</option>
+                    <option value="1.0" selected data-translate="catMoodNormal">{{ translations[language].catMoodNormal }}</option>
+                    <option value="1.2" data-translate="catMoodAffectionate">{{ translations[language].catMoodAffectionate }}</option>
+                    <option value="0.6" data-translate="catMoodDestructive">{{ translations[language].catMoodDestructive }}</option>
+                </select>
+            </div>
         </div>
 
-        <button onclick="calculate()">计算喵生性价比</button>
+        <!-- 生活环境 -->
+        <div class="form-section">
+            <h2 data-translate="livingEnvironmentTitle">🏠 {{ translations[language].livingEnvironmentTitle }}</h2>
+            <div class="form-group">
+                <label for="livingSpace" data-translate="livingSpaceLabel">{{ translations[language].livingSpaceLabel }}</label>
+                <select id="livingSpace">
+                    <option value="0.8" data-translate="livingSpaceSmall">{{ translations[language].livingSpaceSmall }}</option>
+                    <option value="1.0" selected data-translate="livingSpaceMedium">{{ translations[language].livingSpaceMedium }}</option>
+                    <option value="1.2" data-translate="livingSpaceLarge">{{ translations[language].livingSpaceLarge }}</option>
+                    <option value="1.5" data-translate="livingSpaceLuxury">{{ translations[language].livingSpaceLuxury }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="catFurniture" data-translate="catFurnitureLabel">{{ translations[language].catFurnitureLabel }}</label>
+                <select id="catFurniture">
+                    <option value="0.5" data-translate="catFurnitureBasic">{{ translations[language].catFurnitureBasic }}</option>
+                    <option value="1.0" selected data-translate="catFurnitureStandard">{{ translations[language].catFurnitureStandard }}</option>
+                    <option value="1.5" data-translate="catFurnitureLuxury">{{ translations[language].catFurnitureLuxury }}</option>
+                    <option value="2.0" data-translate="catFurnitureCustom">{{ translations[language].catFurnitureCustom }}</option>
+                </select>
+            </div>
+            
+            <div class="form-group">
+                <label for="cleanFrequency" data-translate="cleanFrequencyLabel">{{ translations[language].cleanFrequencyLabel }}</label>
+                <select id="cleanFrequency">
+                    <option value="0.8" data-translate="cleanOccasional">{{ translations[language].cleanOccasional }}</option>
+                    <option value="1.0" selected data-translate="cleanWeekly">{{ translations[language].cleanWeekly }}</option>
+                    <option value="1.2" data-translate="cleanDaily">{{ translations[language].cleanDaily }}</option>
+                    <option value="1.5" data-translate="cleanDeep">{{ translations[language].cleanDeep }}</option>
+                </select>
+            </div>
+        </div>
 
-        <div id="result" class="result">
-            <h2>你的喵生性价比得分: <span id="score">0</span></h2>
-            <img id="catImage" class="cat-img" src="" alt="猫咪图片">
-            <p id="resultText"></p>
+        <button @click="calculate">计算喵生性价比</button>
+        <!-- 结果部分 -->
+        <div id="result" class="result" v-show="showResult">
+            <h2 data-translate="resultTitle">{{ translations[language].resultTitle }}</h2>
+            <div class="score-display">
+                <span>{{ score }}</span>
+                <span style="font-size: 0.5em;" data-translate="scoreUnit">{{ translations[language].scoreUnit }}</span>
+            </div>
+            <img class="cat-img" :src="resultImage" alt="猫咪图片">
+            <p>{{ resultText }}</p>
+            
+            <div class="cost-details">
+                <div class="cost-item">
+                    <h3>{{ translations[language].foodCostLabel }}</h3>
+                    <p>{{ annualFoodCost }} 元</p>
+                </div>
+                <div class="cost-item">
+                    <h3>{{ translations[language].medicalCostLabel }}</h3>
+                    <p>{{ annualMedicalCost }} 元</p>
+                </div>
+                <div class="cost-item">
+                    <h3>{{ translations[language].groomingCostLabel }}</h3>
+                    <p>{{ annualGroomingCost }} 元</p>
+                </div>
+                <div class="cost-item">
+                    <h3>{{ translations[language].suppliesCostLabel }}</h3>
+                    <p>{{ annualLitterCost + parseInt(toyBudget) }} 元</p>
+                </div>
+            </div>
+            
+            <h3 data-translate="analysisTitle">📊 {{ translations[language].analysisTitle }}</h3>
+            <p>{{ analysisText }}</p>
+            
+            <button @click="shareResult" style="background: var(--secondary); color: var(--dark);">
+                📢 <span data-translate="shareButton">{{ translations[language].shareButton }}</span>
+            </button>
         </div>
     </div>
 
     <script>
-      function calculate() {
-    // 获取输入值
-    const catType = document.getElementById('catType').value;
-    const yearlyCost = parseFloat(document.getElementById('yearlyCost').value) || 0;
-    const interactionDays = parseFloat(document.getElementById('interactionDays').value);
-    const dailyTime = parseFloat(document.getElementById('dailyTime').value);
-    const catMood = parseFloat(document.getElementById('catMood').value);
-    const livingCity = parseFloat(document.getElementById('livingCity').value);
-    const homeType = parseFloat(document.getElementById('homeType').value);
+        // 猫咪图片库
+        const catImages = {
+            poor: 'https://cdn.pixabay.com/photo/2016/09/05/21/37/cat-1647775_640.jpg',
+            average: 'https://cdn.pixabay.com/photo/2014/04/13/20/49/cat-323262_640.jpg',
+            good: 'https://cdn.pixabay.com/photo/2015/11/16/22/14/cat-1046544_640.jpg',
+            excellent: 'https://cdn.pixabay.com/photo/2017/07/25/01/22/cat-2536662_640.jpg',
+            perfect: 'https://cdn.pixabay.com/photo/2018/03/26/16/11/cat-3263243_640.jpg'
+        };
 
-    // 基准参数
-    const baseYearlyCost = 5000;
-    const baseInteractionDays = 5;
-    const baseDailyTime = 2;
-    const baseCatMood = 1.0;
-    const baseLivingCity = 1.2;
-    const baseHomeType = 1.0;
+        
+const translations = {
+    zh: {
+        visits: "访问次数",
+        visitors: "访客数",
+        ifUseful: "如果觉得有用，点击小猫图标，在网页右上角给我们一颗小星星吧！",
+        history: "历史记录",
+        startTest: "开始测试",
+        title: "喵星人生活性价比计算器Pro",
+        subtitle: "通过简单的测试，了解你的猫咪性格",
+        disclaimer: "本测试仅供娱乐，结果仅供参考",
+        catProfile: "🐾 猫咪档案",
+catBreed: "猫咪品种",
+cloudCat: "云养猫（无实体猫）",
+commonBreeds: "常见品种",
+chineseDomesticCat: "中华田园猫",
+britishShorthair: "英国短毛猫",
+americanShorthair: "美国短毛猫",
+ragdoll: "布偶猫",
+siamese: "暹罗猫",
+scottishFold: "苏格兰折耳猫",
+rareBreeds: "稀有品种",
+maineCoon: "缅因猫",
+norwegianForestCat: "挪威森林猫",
+bengal: "孟加拉豹猫",
+savannah: "萨凡纳猫",
+catAge: "猫咪年龄",
+kitten: "幼猫（0-1岁）",
+adultCat: "成猫（1-7岁）",
+seniorCat: "老年猫（7岁+）",
+catGender: "猫咪性别",
+maleNeutered: "公猫（已绝育）",
+maleIntact: "公猫（未绝育）",
+femaleNeutered: "母猫（已绝育）",
+femaleIntact: "母猫（未绝育）",
+purchaseCostTitle: "购猫成本",
+purchaseCostLabel: "购猫费用（元）",
+initialSuppliesLabel: "初期用品（猫砂盆/食盆等）",
 
-    // 用户互动时间总量
-    const annualInteractionDays = 52 * interactionDays;
-    const totalUserInteractionTime = annualInteractionDays * dailyTime;
+dailyFeedingTitle: "日常喂养",
+foodGradeLabel: "主粮级别",
+foodGradeBasic: "入门级（20元/斤以下）",
+foodGradeMid: "中端（20-50元/斤）",
+foodGradeHigh: "高端（50-100元/斤）",
+foodGradePremium: "顶级（100元/斤以上）",
+foodGradeRaw: "生骨肉/自制",
+monthlyFoodCostLabel: "月均主粮花费（元）",
+snackGradeLabel: "零食级别",
+snackGradeNone: "不喂零食",
+snackGradeNormal: "普通零食",
+snackGradeHigh: "高端零食/冻干",
+snackGradePremium: "进口顶级零食",
+monthlySnackCostLabel: "月均零食花费（元）",
 
-    // 基准互动时间总量
-    const baseAnnualInteractionDays = 52 * baseInteractionDays;
-    const totalBaseInteractionTime = baseAnnualInteractionDays * baseDailyTime;
+resultTitle: "你的喵星人生活报告",
+        scoreUnit: "分",
+        costDetailsTitle: "年度花费明细",
+        foodCostLabel: "主粮花费",
+        medicalCostLabel: "医疗健康",
+        groomingCostLabel: "美容护理",
+        suppliesCostLabel: "其他用品",
+        analysisTitle: "性价比分析",
+        shareButton: "分享我的喵星人报告",
 
-    // 性价比计算
-    const userValue = catMood * livingCity * homeType * totalUserInteractionTime;
-    const baseValue = baseCatMood * baseLivingCity * baseHomeType * totalBaseInteractionTime;
+        insuranceLabel: "宠物保险",
+        insuranceNone: "无保险",
+        insuranceBasic: "基础保险（500元/年）",
+        insuranceComprehensive: "全面保险（1500元/年）",
+        groomingFrequencyLabel: "美容频率",
+        groomingNone: "不美容",
+        groomingOccasional: "偶尔（2-3月/次）",
+        groomingRegular: "定期（1月/次）",
+        groomingFrequent: "高频（2周/次）",
+        groomingCostLabel: "单次美容费用（元）",
+        litterGradeLabel: "猫砂级别",
+        litterBasic: "膨润土（10元/月）",
+        litterMid: "豆腐砂（30元/月）",
+        litterPremium: "混合砂/进口砂（50元/月）",
+        toyBudgetLabel: "玩具/用品年预算（元）",
+        dailyInteractionLabel: "日均互动时间（小时）",
+        interactionQualityLabel: "互动质量",
+        interactionBasic: "基本喂食/铲屎",
+        interactionNormal: "日常玩耍/梳毛",
+        interactionHigh: "高质量陪伴/训练",
+        catMoodLabel: "猫咪性格",
+        catMoodCold: "高冷傲娇",
+        catMoodNormal: "普通乖巧",
+        catMoodAffectionate: "粘人精",
+        catMoodDestructive: "拆家狂魔",
+        livingEnvironmentTitle: "生活环境",
+        livingSpaceLabel: "居住面积",
+        livingSpaceSmall: "小户型（<50㎡）",
+        livingSpaceMedium: "中等（50-100㎡）",
+        livingSpaceLarge: "大户型（100㎡+）",
+        livingSpaceLuxury: "别墅/大平层",
+        catFurnitureLabel: "猫家具配置",
+        catFurnitureBasic: "基础配置",
+        catFurnitureStandard: "标准配置（猫爬架等）",
+        catFurnitureLuxury: "豪华配置",
+        catFurnitureCustom: "猫房/定制家具",
+        cleanFrequencyLabel: "环境清洁频率",
+        cleanOccasional: "偶尔",
+        cleanWeekly: "每周",
+        cleanDaily: "每日",
+        cleanDeep: "深度清洁", resultTitle: "你的喵星人生活报告",
+        scoreUnit: "分",
+        costDetailsTitle: "年度花费明细",
+        foodCostLabel: "主粮花费",
+        medicalCostLabel: "医疗健康",
+        groomingCostLabel: "美容护理",
+        suppliesCostLabel: "其他用品",
+        analysisTitle: "性价比分析",
+        shareButton: "分享我的喵星人报告",medicalHealthTitle: "医疗健康",
+        vaccineCostLabel: "年疫苗/驱虫费用（元）",
+        groomingTitle: "美容护理",
+        dailySuppliesTitle: "日常用品", interactionTitle: "互动情况",
+        resultTexts: {
+                perfect: '🐱🌟 神仙喵生！你的猫咪生活性价比超高，简直是猫中贵族！',
+                excellent: '🐱💖 优质喵生！你和猫咪相处得很舒适，继续保持～',
+                good: '🐱👍 还不错！猫咪生活性价比尚可，但还有提升空间。',
+                average: '🐱😐 勉强及格！猫咪生活性价比一般，考虑优化养猫方式。',
+                poor: '🐱💔 惨不忍睹！猫咪生活性价比太低，建议重新规划养猫方案。'
+            },
+            analysisTexts: {
+                perfect: '完美平衡！您的猫咪过着奢侈生活而成本却控制得恰到好处。',
+                excellent: '您的猫咪享受着高品质生活而成本控制得当，非常棒！',
+                good: '您的猫咪生活质量和成本控制达到了较好的平衡！',
+                average: '您的养猫成本和生活质量处于中等水平，仍有优化空间。',
+                poor: '您的养猫成本较高而生活质量评分较低，建议优化开支结构或增加互动时间。'
+            }
+    },
+    en: {
+        visits: "Visits",
+        visitors: "Visitors",
+        ifUseful: "If you find this useful, please give us a star!",
+        history: "History",
+        startTest: "Start Test",
+        title: "Cat Life Cost-Effectiveness Calculator Pro",
+        subtitle: "Discover your cat's personality through a simple test",
+        disclaimer: "This test is for entertainment purposes only",
+        catProfile: "🐾 Cat Profile",
+catBreed: "Cat Breed",
+cloudCat: "Cloud Cat (No Physical Cat)",
+commonBreeds: "Common Breeds",
+chineseDomesticCat: "Chinese Domestic Cat",
+britishShorthair: "British Shorthair",
+americanShorthair: "American Shorthair",
+ragdoll: "Ragdoll",
+siamese: "Siamese",
+scottishFold: "Scottish Fold",
+rareBreeds: "Rare Breeds", interactionTitle: "Interaction",
+maineCoon: "Maine Coon",
+norwegianForestCat: "Norwegian Forest Cat",
+bengal: "Bengal",
+savannah: "Savannah",
+catAge: "Cat Age",
+kitten: "Kitten (0-1 year)",
+adultCat: "Adult Cat (1-7 years)",
+seniorCat: "Senior Cat (7+ years)",
+catGender: "Cat Gender",
+maleNeutered: "Male (Neutered)",
+maleIntact: "Male (Intact)",
+femaleNeutered: "Female (Neutered)",
+femaleIntact: "Female (Intact)",purchaseCostTitle: "Initial Cat Costs",
+purchaseCostLabel: "Cat Purchase Price (¥)",
+initialSuppliesLabel: "Initial Supplies (Litter box/Bowls etc.)",
 
-    const costRatio = yearlyCost / baseYearlyCost;
+dailyFeedingTitle: "Daily Feeding",
+foodGradeLabel: "Main Food Grade",
+foodGradeBasic: "Basic (Under ¥20/500g)",
+foodGradeMid: "Mid-range (¥20-50/500g)",
+foodGradeHigh: "Premium (¥50-100/500g)",
+foodGradePremium: "Luxury (Over ¥100/500g)",
+foodGradeRaw: "Raw/Home-made",
+monthlyFoodCostLabel: "Monthly Food Cost (¥)",
 
-    const score = (userValue / costRatio) / baseValue;
+snackGradeLabel: "Snack Grade",
+snackGradeNone: "No Snacks",
+snackGradeNormal: "Regular Snacks",
+snackGradeHigh: "Premium Snacks/Freeze-dried",
+snackGradePremium: "Imported Luxury Snacks",
+monthlySnackCostLabel: "Monthly Snack Cost (¥)", medicalHealthTitle: "Medical Health",
+        vaccineCostLabel: "Annual Vaccine/Deworming Cost (¥)",
+        groomingTitle: "Grooming",
+        dailySuppliesTitle: "Daily Supplies",
 
-    // 显示结果
-    document.getElementById('score').textContent = score.toFixed(2);
-    document.getElementById('result').style.display = 'block';
 
-    // 结果文案和图片
-    let resultText = '';
-    let catImage = '';
 
-    if (score > 1.5) {
-        resultText = '🐱🌟 神仙喵生！你的猫咪生活性价比超高，简直是猫中贵族！';
-        catImage = 'https://cdn.pixabay.com/photo/2017/07/25/01/22/cat-2536662_640.jpg';
-    } else if (score > 1.2) {
-        resultText = '🐱💖 优质喵生！你和猫咪相处得很舒适，继续保持～';
-        catImage = 'https://cdn.pixabay.com/photo/2015/11/16/22/14/cat-1046544_640.jpg';
-    } else if (score > 1.0) {
-        resultText = '🐱👍 还不错！猫咪生活性价比尚可，但还有提升空间。';
-        catImage = 'https://cdn.pixabay.com/photo/2014/04/13/20/49/cat-323262_640.jpg';
-    } else if (score > 0.8) {
-        resultText = '🐱😐 勉强及格！猫咪生活性价比一般，考虑优化养猫方式。';
-        catImage = 'https://cdn.pixabay.com/photo/2018/01/28/12/37/cat-3113513_640.jpg';
-    } else {
-        resultText = '🐱💔 惨不忍睹！猫咪生活性价比太低，建议重新规划养猫方案。';
-        catImage = 'https://cdn.pixabay.com/photo/2016/09/05/21/37/cat-1647775_640.jpg';
+resultTitle: "Your Cat Lifestyle Report",
+        scoreUnit: "points",
+        costDetailsTitle: "Annual Cost Breakdown",
+        foodCostLabel: "Food Cost",
+        medicalCostLabel: "Medical Health",
+        groomingCostLabel: "Grooming",
+        suppliesCostLabel: "Other Supplies",
+        analysisTitle: "Cost-Effectiveness Analysis",
+        shareButton: "Share My Cat Report",
+
+        insuranceLabel: "Pet Insurance",
+        insuranceNone: "No Insurance",
+        insuranceBasic: "Basic Insurance (¥500/year)",
+        insuranceComprehensive: "Comprehensive Insurance (¥1500/year)",
+        groomingFrequencyLabel: "Grooming Frequency",
+        groomingNone: "No Grooming",
+        groomingOccasional: "Occasional (Every 2-3 months)",
+        groomingRegular: "Regular (Monthly)",
+        groomingFrequent: "Frequent (Every 2 weeks)",
+        groomingCostLabel: "Single Grooming Cost (¥)",
+        litterGradeLabel: "Litter Grade",
+        litterBasic: "Bentonite (¥10/month)",
+        litterMid: "Tofu Litter (¥30/month)",
+        litterPremium: "Mixed/Imported Litter (¥50/month)",
+        toyBudgetLabel: "Toy/Supplies Annual Budget (¥)",
+        dailyInteractionLabel: "Daily Interaction Time (hours)",
+        interactionQualityLabel: "Interaction Quality",
+        interactionBasic: "Basic Feeding/Litter Cleaning",
+        interactionNormal: "Daily Play/Grooming",
+        interactionHigh: "High-Quality Companionship/Training",
+        catMoodLabel: "Cat Personality",
+        catMoodCold: "Aloof and Proud",
+        catMoodNormal: "Normal and Well-Behaved",
+        catMoodAffectionate: "Affectionate",
+        catMoodDestructive: "Destructive",
+        livingEnvironmentTitle: "Living Environment",
+        livingSpaceLabel: "Living Space",
+        livingSpaceSmall: "Small (<50㎡)",
+        livingSpaceMedium: "Medium (50-100㎡)",
+        livingSpaceLarge: "Large (100㎡+)",
+        livingSpaceLuxury: "Villa/Luxury Apartment",
+        catFurnitureLabel: "Cat Furniture",
+        catFurnitureBasic: "Basic Setup",
+        catFurnitureStandard: "Standard Setup (Cat Tree, etc.)",
+        catFurnitureLuxury: "Luxury Setup",
+        catFurnitureCustom: "Custom Furniture/Cat Room",
+        cleanFrequencyLabel: "Cleaning Frequency",
+        cleanOccasional: "Occasional",
+        cleanWeekly: "Weekly",
+        cleanDaily: "Daily",
+        cleanDeep: "Deep Cleaning", resultTitle: "Your Cat Lifestyle Report",
+        scoreUnit: "points",
+        costDetailsTitle: "Annual Cost Breakdown",
+        foodCostLabel: "Food Cost",
+        medicalCostLabel: "Medical Health",
+        groomingCostLabel: "Grooming",
+        suppliesCostLabel: "Other Supplies",
+        analysisTitle: "Cost-Effectiveness Analysis",
+        shareButton: "Share My Cat Report",
+        resultTexts: {
+                perfect: '🐱🌟 Heavenly Cat Life! Your cat\'s cost-effectiveness is off the charts, truly a feline aristocrat!',
+                excellent: '🐱💖 High - Quality Cat Life! You and your cat are having a great time together. Keep it up!',
+                good: '🐱👍 Not Bad! Your cat\'s cost - effectiveness is acceptable, but there\'s room for improvement.',
+                average: '🐱😐 Barely Passing! Your cat\'s cost - effectiveness is mediocre. Consider optimizing your cat - raising methods.',
+                poor: '🐱💔 Heartbreaking! Your cat\'s cost - effectiveness is too low. It\'s recommended to replan your cat - raising strategy.'
+            },
+            analysisTexts: {
+                perfect: 'Perfect balance! Your cat enjoys a luxurious life while the cost is well - controlled.',
+                excellent: 'Your cat enjoys a high - quality life with well - controlled costs. Great job!',
+                good: 'Your cat\'s quality of life and cost control have achieved a good balance!',
+                average: 'Your cat - raising costs and quality of life are at a moderate level. There is still room for optimization.',
+                poor: 'Your cat - raising costs are high and the quality of life score is low. It is recommended to optimize the expenditure structure or increase interaction time.'
+            }
+    },
+    ja: {
+        visits: "訪問回数",
+        visitors: "訪問者数",
+        ifUseful: "役に立ったら、スターをください！",
+        history: "履歴",
+        startTest: "テストを開始",
+        title: "猫の生活コストパフォーマンス計算機Pro",
+        subtitle: "簡単なテストで猫の性格を診断します",
+        disclaimer: "このテストは娯楽目的です",
+        catProfile: "🐾 猫のプロフィール",
+catBreed: "猫の品種",
+cloudCat: "クラウド猫（実体なし）",
+commonBreeds: "一般的な品種",
+chineseDomesticCat: "中国の家猫",
+britishShorthair: "ブリティッシュショートヘア",
+americanShorthair: "アメリカンショートヘア",  interactionTitle: "交流状況",
+ragdoll: "ラグドール",
+siamese: "シャム猫",
+scottishFold: "スコティッシュフォールド",
+rareBreeds: "希少な品種",
+maineCoon: "メインクーン",
+norwegianForestCat: "ノルウェージャンフォレストキャット",
+bengal: "ベンガル",
+savannah: "サバンナ",
+catAge: "猫の年齢",
+kitten: "子猫（0-1歳）",
+adultCat: "成猫（1-7歳）",
+seniorCat: "老猫（7歳以上）",
+catGender: "猫の性別",
+maleNeutered: "オス（去勢済み）",
+maleIntact: "オス（未去勢）",
+femaleNeutered: "メス（避妊済み）",
+femaleIntact: "メス（未避妊）",purchaseCostTitle: "猫購入費用",
+purchaseCostLabel: "猫購入費用（元）",
+initialSuppliesLabel: "初期用品（トイレ/食器など）",
+dailyFeedingTitle: "日常の餌やり",
+foodGradeLabel: "主食用フードグレード",
+foodGradeBasic: "エントリーレベル（20元/500g以下）",
+foodGradeMid: "ミドルレンジ（20-50元/500g）",
+foodGradeHigh: "ハイエンド（50-100元/500g）",
+foodGradePremium: "プレミアム（100元/500g以上）",
+foodGradeRaw: "生肉/手作り",
+monthlyFoodCostLabel: "月間フード費用（元）",
+snackGradeLabel: "おやつグレード",
+snackGradeNone: "おやつなし",
+snackGradeNormal: "普通のおやつ",
+snackGradeHigh: "高級おやつ/フリーズドライ",medicalHealthTitle: "医療健康",
+        vaccineCostLabel: "年間ワクチン/駆虫費用（元）",
+        groomingTitle: "グルーミング",
+        dailySuppliesTitle: "日常用品",
+snackGradePremium: "輸入プレミアムおやつ",
+monthlySnackCostLabel: "月間おやつ費用（元）",resultTitle: "あなたの猫の生活レポート",
+        scoreUnit: "点",
+        costDetailsTitle: "年間費用明細",
+        foodCostLabel: "フード費用",
+        medicalCostLabel: "医療健康",
+        groomingCostLabel: "グルーミング",
+        suppliesCostLabel: "その他用品",
+        analysisTitle: "コストパフォーマンス分析",
+        shareButton: "私の猫レポートを共有",
+        insuranceLabel: "ペット保険",
+        insuranceNone: "保険なし",
+        insuranceBasic: "基本保険（500元/年）",
+        insuranceComprehensive: "総合保険（1500元/年）",
+        groomingFrequencyLabel: "グルーミング頻度",
+        groomingNone: "グルーミングなし",
+        groomingOccasional: "たまに（2-3ヶ月に1回）",
+        groomingRegular: "定期的（月1回）",
+        groomingFrequent: "頻繁（2週間に1回）",
+        groomingCostLabel: "単回グルーミング費用（元）",
+        litterGradeLabel: "猫砂グレード",
+        litterBasic: "ベントナイト（10元/月）",
+        litterMid: "豆腐砂（30元/月）",
+        litterPremium: "混合/輸入砂（50元/月）",
+        toyBudgetLabel: "おもちゃ/用品年間予算（元）",
+        dailyInteractionLabel: "1日の交流時間（時間）",
+        interactionQualityLabel: "交流の質",
+        interactionBasic: "基本的な餌やり/トイレ掃除",
+        interactionNormal: "日常的な遊び/グルーミング",
+        interactionHigh: "高品質な交流/トレーニング",
+        catMoodLabel: "猫の性格",
+        catMoodCold: "クールでプライドが高い",
+        catMoodNormal: "普通でおとなしい",
+        catMoodAffectionate: "甘えん坊",
+        catMoodDestructive: "破壊的",
+        livingEnvironmentTitle: "生活環境",
+        livingSpaceLabel: "居住面積",
+        livingSpaceSmall: "小さい（<50㎡）",
+        livingSpaceMedium: "中程度（50-100㎡）",
+        livingSpaceLarge: "大きい（100㎡+）",
+        livingSpaceLuxury: "別荘/豪華アパート",
+        catFurnitureLabel: "猫家具",
+        catFurnitureBasic: "基本セット",
+        catFurnitureStandard: "標準セット（キャットツリーなど）",
+        catFurnitureLuxury: "豪華セット",
+        catFurnitureCustom: "カスタム家具/猫部屋",
+        cleanFrequencyLabel: "掃除頻度",
+        cleanOccasional: "たまに",
+        cleanWeekly: "毎週",
+        cleanDaily: "毎日",
+        cleanDeep: "徹底的な掃除", resultTitle: "あなたの猫の生活レポート",
+        scoreUnit: "点",
+        costDetailsTitle: "年間費用明細",
+        foodCostLabel: "フード費用",
+        medicalCostLabel: "医療健康",
+        groomingCostLabel: "グルーミング",
+        suppliesCostLabel: "その他用品",
+        analysisTitle: "コストパフォーマンス分析",
+        shareButton: "私の猫レポートを共有",
+        resultTexts: {
+                perfect: '🐱🌟 神仙猫生活！あなたの猫の費用対効果は絶大で、まさに猫の貴族！',
+                excellent: '🐱💖 質の高い猫生活！あなたと猫は快適に過ごしています。この調子で！',
+                good: '🐱👍 まあまあ！猫の費用対効果は許容範囲内ですが、改善の余地があります。',
+                average: '🐱😐 かろうじて合格！猫の費用対効果は普通です。飼育方法を最適化することを検討してください。',
+                poor: '🐱💔 惨不忍睹！猫の費用対効果が低すぎます。飼育計画の見直しをおすすめします。'
+            },
+            analysisTexts: {
+                perfect: '完璧なバランス！あなたの猫は贅沢な生活を送りながら、費用もきちんとコントロールされています。',
+                excellent: 'あなたの猫は高品質な生活を楽しんでおり、費用も適切にコントロールされています。素晴らしい！',
+                good: 'あなたの猫の生活の質と費用対効果がうまくバランスしています！',
+                average: 'あなたの飼育費用と生活の質は中程度で、まだ改善の余地があります。',
+                poor: 'あなたの飼育費用が高く、生活の質のスコアが低いです。支出構造を最適化するか、交流時間を増やすことをおすすめします。'
+            }
     }
+};
+            
+new Vue({
+    el: '#app',
+    data: {
+        language: 'zh',
+        translations: translations,
+        visitCount: 0,
+        visitorCount: 0,
+        testHistory: [],
+        showHistory: false,
+        // 新增的结果展示相关数据
+        showResult: false,
+        score: 0,
+        resultImage: '',
+        resultText: '',
+        analysisText: '',
+        // 成本明细数据
+        annualFoodCost: 0,
+        annualSnackCost: 0,
+        annualMedicalCost: 0,
+        annualGroomingCost: 0,
+        annualLitterCost: 0,
+        toyBudget: 0,
+        initialCost: 0
+    },
+    methods: {
+        shareResult() {
+            const shareText = `${this.translations[this.language].resultTitle}: ${this.score}${this.translations[this.language].scoreUnit} - ${this.resultText}`;
+            if (navigator.share) {
+                navigator.share({
+                    title: this.translations[this.language].title,
+                    text: shareText,
+                    url: window.location.href
+                }).catch(err => {
+                    console.log('分享失败:', err);
+                    this.copyToClipboard(shareText);
+                });
+            } else {
+                this.copyToClipboard(shareText);
+            }
+        },
+        copyToClipboard(text) {
+            const textarea = document.createElement('textarea');
+            textarea.value = text;
+            document.body.appendChild(textarea);
+            textarea.select();
+            document.execCommand('copy');
+            document.body.removeChild(textarea);
+            alert(this.translations[this.language].shareButton + ' 已复制到剪贴板');
+        },
+        saveToHistory() {
+            const catTypeSelect = document.getElementById('catType');
+            const catName = catTypeSelect.options[catTypeSelect.selectedIndex].getAttribute('data-translate');
+            
+            const historyItem = {
+                date: new Date().toLocaleString(),
+                catName: this.translations[this.language][catName] || '未知品种',
+                score: this.score,
+                result: {
+                    image: this.resultImage,
+                    text: this.resultText,
+                    analysis: this.analysisText
+                }
+            };
+            this.testHistory.unshift(historyItem);
+            localStorage.setItem('catTestHistory', JSON.stringify(this.testHistory));
+        },
 
-    document.getElementById('resultText').textContent = resultText;
-    document.getElementById('catImage').src = catImage;
-}
+        viewHistoryResult(index) {
+            const historyItem = this.testHistory[index];
+            this.score = historyItem.score;
+            this.resultImage = historyItem.result.image;
+            this.resultText = historyItem.result.text;
+            this.analysisText = historyItem.result.analysis;
+            this.showResult = true;
+        },
+
+        recordVisit() {
+            const visitorId = this.getVisitorId();
+            const lastVisit = localStorage.getItem('lastVisit');
+            const now = new Date().getTime();
+            
+            this.visitCount = parseInt(localStorage.getItem('visitCount') || 0) + 1;
+            localStorage.setItem('visitCount', this.visitCount);
+            
+            if (!lastVisit || (now - lastVisit) > 24 * 60 * 60 * 1000) {
+                this.visitorCount = parseInt(localStorage.getItem('visitorCount') || 0) + 1;
+                localStorage.setItem('visitorCount', this.visitorCount);
+                localStorage.setItem('lastVisit', now);
+            }
+        },
+
+        getVisitorId() {
+            let visitorId = localStorage.getItem('visitorId');
+            if (!visitorId) {
+                visitorId = 'visitor-' + Math.random().toString(36).substr(2, 9);
+                localStorage.setItem('visitorId', visitorId);
+            }
+            return visitorId;
+        },
+
+        loadStats() {
+            this.visitCount = parseInt(localStorage.getItem('visitCount') || 0);
+            this.visitorCount = parseInt(localStorage.getItem('visitorCount') || 0);
+            
+            const savedHistory = localStorage.getItem('catTestHistory');
+            if (savedHistory) {
+                this.testHistory = JSON.parse(savedHistory);
+            }
+        },
+
+        updatePageLanguage() {
+            const translatableElements = document.querySelectorAll('[data-translate]');
+            translatableElements.forEach(element => {
+                const key = element.getAttribute('data-translate');
+                if (this.translations[this.language][key]) {
+                    element.textContent = this.translations[this.language][key];
+                }
+            });
+
+            const optgroups = document.querySelectorAll('optgroup[label]');
+            optgroups.forEach(optgroup => {
+                const labelKey = optgroup.getAttribute('label');
+                optgroup.label = this.translations[this.language][labelKey] || '';
+            });
+
+            const options = document.querySelectorAll('option[data-translate]');
+            options.forEach(option => {
+                const key = option.getAttribute('data-translate');
+                option.textContent = this.translations[this.language][key] || '';
+            });
+        },
+
+        calculate() {
+            try {
+                // 获取所有输入值
+                const catType = parseFloat(document.getElementById('catType').value);
+                const catAge = parseFloat(document.getElementById('catAge').value);
+                const catGender = parseFloat(document.getElementById('catGender').value);
+                const purchaseCost = parseFloat(document.getElementById('purchaseCost').value);
+                const initialSupplies = parseFloat(document.getElementById('initialSupplies').value);
+                const foodGrade = parseFloat(document.getElementById('foodGrade').value);
+                const monthlyFoodCost = parseFloat(document.getElementById('monthlyFoodCost').value);
+                const snackGrade = parseFloat(document.getElementById('snackGrade').value);
+                const monthlySnackCost = parseFloat(document.getElementById('monthlySnackCost').value);
+                const vaccineCost = parseFloat(document.getElementById('vaccineCost').value);
+                const insurance = parseFloat(document.getElementById('insurance').value);
+                const medicalCost = parseFloat(document.getElementById('medicalCost').value);
+                const groomingFrequency = parseFloat(document.getElementById('groomingFrequency').value);
+                const groomingCost = parseFloat(document.getElementById('groomingCost').value);
+                const litterGrade = parseFloat(document.getElementById('litterGrade').value);
+                const toyBudget = parseFloat(document.getElementById('toyBudget').value);
+                const dailyInteraction = parseFloat(document.getElementById('dailyInteraction').value);
+                const interactionQuality = parseFloat(document.getElementById('interactionQuality').value);
+                const catMood = parseFloat(document.getElementById('catMood').value);
+                const livingSpace = parseFloat(document.getElementById('livingSpace').value);
+                const catFurniture = parseFloat(document.getElementById('catFurniture').value);
+                const cleanFrequency = parseFloat(document.getElementById('cleanFrequency').value);
+
+                // 计算各项年度成本
+                this.annualFoodCost = monthlyFoodCost * 12 * foodGrade;
+                this.annualSnackCost = monthlySnackCost * 12 * snackGrade;
+                this.annualMedicalCost = (medicalCost + vaccineCost) * insurance;
+                this.annualGroomingCost = groomingCost * 12 * groomingFrequency;
+                this.annualLitterCost = 12 * (litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50));
+                this.toyBudget = toyBudget;
+                
+                // 计算总年度成本
+                const totalAnnualCost = this.annualFoodCost + this.annualSnackCost + this.annualMedicalCost + 
+                                     this.annualGroomingCost + this.annualLitterCost + this.toyBudget;
+                    
+                // 计算初始成本
+                this.initialCost = purchaseCost + initialSupplies;
+                    
+                // 计算生活质量评分 (0-100)
+                const qualityScore = (
+                    (dailyInteraction * interactionQuality * 2) +
+                    (livingSpace * catFurniture * 10) +
+                    (cleanFrequency * 5) +
+                    (catMood * 20) +
+                    (foodGrade * 10) +
+                    (snackGrade * 5) +
+                    (groomingFrequency * 5)
+                ) * catType * catAge * catGender;
+                    
+                // 计算性价比评分 (0-100)
+                this.score = Math.min(100, Math.max(0, 
+                    (qualityScore * 100 / Math.max(1, totalAnnualCost)) * 0.8 + 
+                    (qualityScore * 100 / Math.max(1, this.initialCost)) * 0.2
+                )).toFixed(1);
+                    
+                // 根据评分选择图片和评语
+                const score = parseFloat(this.score);
+                let imageSrc, resultText, analysisText;
+                    
+                if (score === 0) {
+                        imageSrc = catImages.poor;
+                        resultText = this.translations[this.language].resultTexts.poor;
+                        analysisText = this.translations[this.language].analysisTexts.poor;
+                    } else if (score < 30) {
+                        imageSrc = catImages.poor;
+                        resultText = this.translations[this.language].resultTexts.poor;
+                        analysisText = this.translations[this.language].analysisTexts.poor;
+                    } else if (score < 60) {
+                        imageSrc = catImages.average;
+                        resultText = this.translations[this.language].resultTexts.average;
+                        analysisText = this.translations[this.language].analysisTexts.average;
+                    } else if (score < 85) {
+                        imageSrc = catImages.good;
+                        resultText = this.translations[this.language].resultTexts.good;
+                        analysisText = this.translations[this.language].analysisTexts.good;
+                    } else if (score < 95) {
+                        imageSrc = catImages.excellent;
+                        resultText = this.translations[this.language].resultTexts.excellent;
+                        analysisText = this.translations[this.language].analysisTexts.excellent;
+                    } else {
+                        imageSrc = catImages.perfect;
+                        resultText = this.translations[this.language].resultTexts.perfect;
+                        analysisText = this.translations[this.language].analysisTexts.perfect;
+                    }
+                    
+                this.resultImage = imageSrc;
+                this.resultText = resultText;
+                this.analysisText = analysisText;
+                this.showResult = true;
+                
+                // 保存到历史记录
+                this.saveToHistory();
+                
+            } catch (error) {
+                console.error('计算出错:', error);
+                this.resultText = "计算过程中出现错误，请检查输入值";
+                this.analysisText = error.message;
+                this.showResult = true;
+            }
+        }
+    },
+    mounted() {
+        const savedLang = localStorage.getItem('catTestLang');
+        if (savedLang) this.language = savedLang;
+        
+        this.loadStats();
+        this.recordVisit();
+        this.updatePageLanguage();  
+    },
+    watch: {
+        language(newLang) {
+            localStorage.setItem('catTestLang', newLang);
+            this.updatePageLanguage();
+        }  
+    }
+});
+
+
+      
     </script>
 </body>
-</html>
