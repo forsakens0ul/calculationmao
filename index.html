@@ -1083,20 +1083,23 @@ new Vue({
         }
     },
     mounted() {
-        const savedLang = localStorage.getItem('catTestLang');
-        if (savedLang) this.language = savedLang;
+        const savedLang = localStorage.getItem('catTestLang')|| 'zh';
+       
+        this.language = savedLang;
         
-        this.loadStats();
-        this.recordVisit();
+        
         this.$nextTick(() => {
-            this.updatePageLanguage();
-        });
-        
+        this.updatePageLanguage();
+    });
+    this.loadStats();
+        this.recordVisit(); 
     },
     watch: {
         language(newLang) {
             localStorage.setItem('catTestLang', newLang);
+            this.$nextTick(() => {
             this.updatePageLanguage();
+        });
         }  
     }
 });
