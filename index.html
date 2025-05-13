@@ -1088,7 +1088,10 @@ new Vue({
         
         this.loadStats();
         this.recordVisit();
-        this.updatePageLanguage();  
+        this.$nextTick(() => {
+            this.updatePageLanguage();
+        });
+        
     },
     watch: {
         language(newLang) {
