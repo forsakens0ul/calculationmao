@@ -978,7 +978,7 @@ new Vue({
             });
         },
 
-      calculate() {
+    calculate() {
     try {
         // 获取所有输入值
         const catType = document.getElementById('catType').value;
@@ -1003,20 +1003,16 @@ new Vue({
         const livingSpace = parseFloat(document.getElementById('livingSpace').value);
         const catFurniture = parseFloat(document.getElementById('catFurniture').value);
         const cleanFrequency = parseFloat(document.getElementById('cleanFrequency').value);
-        const litterMonthlyCost = {
-  '0.5': 15,  // 膨润土
-  '1.0': 40,  // 豆腐砂
-  '1.5': 70   // 混合砂/进口砂
-}[litterGrade] || 40;  // 默认值
+
         // 1. 经济成本计算
         const litterCost = litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50);
-       const annualCost = 
-  (monthlyFoodCost * 12 * foodGradeFactor) +    // 主粮
-  (monthlySnackCost * 12 * snackGradeFactor) +  // 零食
-  (vaccineCost + medicalCost) * insuranceFactor + // 医疗
-  (groomingCost * groomingFrequency * 12) +     // 美容
-  (litterMonthlyCost * 12) +                    // 猫砂(月费用×12)
-  toyBudget;                                    // 玩具(已经是年预算)
+        const annualCost = 
+            (monthlyFoodCost * 12 * (0.5 + foodGrade * 0.3)) +
+            (monthlySnackCost * 12 * (0.3 + snackGrade * 0.2)) +
+            ((vaccineCost + medicalCost) * (0.5 + insurance * 0.3)) +
+            (groomingCost * groomingFrequency * 12) +
+            (litterCost * 12) +
+            toyBudget;
         
         const costFactor = Math.min(100, (annualCost / 5000) * 100);
         const costScore = 30 - (costFactor * 0.3);
@@ -1116,8 +1112,6 @@ new Vue({
         this.annualLitterCost = (litterCost * 12).toFixed(0);
         this.toyBudget = toyBudget;
         this.initialCost = purchaseCost + initialSupplies;
-        this.annualCost = annualCost;
-        
 
         // 保存到历史记录
         this.saveToHistory();
