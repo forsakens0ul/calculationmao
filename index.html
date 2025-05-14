@@ -978,109 +978,108 @@ new Vue({
             });
         },
 
-        calculate() {
-            try {
-                // 获取所有输入值
-                const catType = parseFloat(document.getElementById('catType').value);
-                const catAge = parseFloat(document.getElementById('catAge').value);
-                const catGender = parseFloat(document.getElementById('catGender').value);
-                const purchaseCost = parseFloat(document.getElementById('purchaseCost').value);
-                const initialSupplies = parseFloat(document.getElementById('initialSupplies').value);
-                const foodGrade = parseFloat(document.getElementById('foodGrade').value);
-                const monthlyFoodCost = parseFloat(document.getElementById('monthlyFoodCost').value);
-                const snackGrade = parseFloat(document.getElementById('snackGrade').value);
-                const monthlySnackCost = parseFloat(document.getElementById('monthlySnackCost').value);
-                const vaccineCost = parseFloat(document.getElementById('vaccineCost').value);
-                const insurance = parseFloat(document.getElementById('insurance').value);
-                const medicalCost = parseFloat(document.getElementById('medicalCost').value);
-                const groomingFrequency = parseFloat(document.getElementById('groomingFrequency').value);
-                const groomingCost = parseFloat(document.getElementById('groomingCost').value);
-                const litterGrade = parseFloat(document.getElementById('litterGrade').value);
-                const toyBudget = parseFloat(document.getElementById('toyBudget').value);
-                const dailyInteraction = parseFloat(document.getElementById('dailyInteraction').value);
-                const interactionQuality = parseFloat(document.getElementById('interactionQuality').value);
-                const catMood = parseFloat(document.getElementById('catMood').value);
-                const livingSpace = parseFloat(document.getElementById('livingSpace').value);
-                const catFurniture = parseFloat(document.getElementById('catFurniture').value);
-                const cleanFrequency = parseFloat(document.getElementById('cleanFrequency').value);
+       calculate() {
+    try {
+        // 获取所有输入值
+        const catType = parseFloat(document.getElementById('catType').value);
+        const catAge = parseFloat(document.getElementById('catAge').value);
+        const catGender = parseFloat(document.getElementById('catGender').value);
+        const purchaseCost = parseFloat(document.getElementById('purchaseCost').value);
+        const initialSupplies = parseFloat(document.getElementById('initialSupplies').value);
+        const foodGrade = parseFloat(document.getElementById('foodGrade').value);
+        const monthlyFoodCost = parseFloat(document.getElementById('monthlyFoodCost').value);
+        const snackGrade = parseFloat(document.getElementById('snackGrade').value);
+        const monthlySnackCost = parseFloat(document.getElementById('monthlySnackCost').value);
+        const vaccineCost = parseFloat(document.getElementById('vaccineCost').value);
+        const insurance = parseFloat(document.getElementById('insurance').value);
+        const medicalCost = parseFloat(document.getElementById('medicalCost').value);
+        const groomingFrequency = parseFloat(document.getElementById('groomingFrequency').value);
+        const groomingCost = parseFloat(document.getElementById('groomingCost').value);
+        const litterGrade = parseFloat(document.getElementById('litterGrade').value);
+        const toyBudget = parseFloat(document.getElementById('toyBudget').value);
+        const dailyInteraction = parseFloat(document.getElementById('dailyInteraction').value);
+        const interactionQuality = parseFloat(document.getElementById('interactionQuality').value);
+        const catMood = parseFloat(document.getElementById('catMood').value);
+        const livingSpace = parseFloat(document.getElementById('livingSpace').value);
+        const catFurniture = parseFloat(document.getElementById('catFurniture').value);
+        const cleanFrequency = parseFloat(document.getElementById('cleanFrequency').value);
 
-                // 计算各项年度成本
-                this.annualFoodCost = monthlyFoodCost * 12 * foodGrade;
-                this.annualSnackCost = monthlySnackCost * 12 * snackGrade;
-                this.annualMedicalCost = (medicalCost + vaccineCost) * insurance;
-                this.annualGroomingCost = groomingCost * 12 * groomingFrequency;
-                this.annualLitterCost = 12 * (litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50));
-                this.toyBudget = toyBudget;
-                
-                // 计算总年度成本
-                const totalAnnualCost = this.annualFoodCost + this.annualSnackCost + this.annualMedicalCost + 
-                                     this.annualGroomingCost + this.annualLitterCost + this.toyBudget;
-                    
-                // 计算初始成本
-                this.initialCost = purchaseCost + initialSupplies;
-                    
-                // 计算生活质量评分 (0-100)
-                const qualityScore = (
-                    (dailyInteraction * interactionQuality * 2) +
-                    (livingSpace * catFurniture * 10) +
-                    (cleanFrequency * 5) +
-                    (catMood * 20) +
-                    (foodGrade * 10) +
-                    (snackGrade * 5) +
-                    (groomingFrequency * 5)
-                ) * catType * catAge * catGender;
-                    
-                // 计算性价比评分 (0-100)
-                this.score = Math.min(100, Math.max(0, 
-                    (qualityScore * 100 / Math.max(1, totalAnnualCost)) * 0.8 + 
-                    (qualityScore * 100 / Math.max(1, this.initialCost)) * 0.2
-                )).toFixed(1);
-                    
-                // 根据评分选择图片和评语
-                const score = parseFloat(this.score);
-                let imageSrc, resultText, analysisText;
-                    
-                if (score === 0) {
-                        imageSrc = catImages.poor;
-                        resultText = this.translations[this.language].resultTexts.poor;
-                        analysisText = this.translations[this.language].analysisTexts.poor;
-                    } else if (score < 30) {
-                        imageSrc = catImages.poor;
-                        resultText = this.translations[this.language].resultTexts.poor;
-                        analysisText = this.translations[this.language].analysisTexts.poor;
-                    } else if (score < 60) {
-                        imageSrc = catImages.average;
-                        resultText = this.translations[this.language].resultTexts.average;
-                        analysisText = this.translations[this.language].analysisTexts.average;
-                    } else if (score < 85) {
-                        imageSrc = catImages.good;
-                        resultText = this.translations[this.language].resultTexts.good;
-                        analysisText = this.translations[this.language].analysisTexts.good;
-                    } else if (score < 95) {
-                        imageSrc = catImages.excellent;
-                        resultText = this.translations[this.language].resultTexts.excellent;
-                        analysisText = this.translations[this.language].analysisTexts.excellent;
-                    } else {
-                        imageSrc = catImages.perfect;
-                        resultText = this.translations[this.language].resultTexts.perfect;
-                        analysisText = this.translations[this.language].analysisTexts.perfect;
-                    }
-                    
-                this.resultImage = imageSrc;
-                this.resultText = resultText;
-                this.analysisText = analysisText;
-                this.showResult = true;
-                
-                // 保存到历史记录
-                this.saveToHistory();
-                
-            } catch (error) {
-                console.error('计算出错:', error);
-                this.resultText = "计算过程中出现错误，请检查输入值";
-                this.analysisText = error.message;
-                this.showResult = true;
-            }
+        // 改进后的成本计算
+        this.annualFoodCost = Math.max(100, monthlyFoodCost) * 12 * (0.5 + foodGrade * 0.5);
+        this.annualSnackCost = Math.max(20, monthlySnackCost) * 12 * (0.5 + snackGrade * 0.5);
+        this.annualMedicalCost = Math.max(200, medicalCost + vaccineCost) * (0.5 + insurance * 0.5);
+        this.annualGroomingCost = Math.max(50, groomingCost) * 12 * (0.5 + groomingFrequency * 0.5);
+        this.annualLitterCost = 12 * (litterGrade === 0.5 ? 15 : (litterGrade === 1.0 ? 40 : 70));
+        this.toyBudget = Math.max(50, toyBudget);
+        
+        // 计算总年度成本
+        const totalAnnualCost = this.annualFoodCost + this.annualSnackCost + this.annualMedicalCost +
+            this.annualGroomingCost + this.annualLitterCost + this.toyBudget;
+
+        // 计算初始成本
+        this.initialCost = Math.max(100, purchaseCost + initialSupplies);
+
+        // 改进后的生活质量评分计算
+        const qualityScore = (
+            (dailyInteraction * interactionQuality * 5) +  // 提高互动权重
+            (livingSpace * catFurniture * 5) +           // 降低空间权重
+            (cleanFrequency * 3) +                       // 降低清洁权重
+            (catMood * 15) +                             // 降低性格权重
+            (foodGrade * 8) +                            // 降低食物权重
+            (snackGrade * 3) +                           // 降低零食权重
+            (groomingFrequency * 3)                      // 降低美容权重
+        ) * (1 + (catType - 1) * 0.3) * catAge * catGender; // 降低品种影响
+
+        // 改进后的性价比评分计算
+        const annualCostRatio = qualityScore * 100 / Math.max(1000, totalAnnualCost);
+        const initialCostRatio = qualityScore * 100 / Math.max(500, this.initialCost);
+
+        this.score = Math.min(100, Math.max(0,
+            annualCostRatio * 0.9 +  // 提高年度成本权重
+            initialCostRatio * 0.1   // 降低初始成本权重
+        )).toFixed(1);
+
+        // 改进后的评分区间
+        const score = parseFloat(this.score);
+        let imageSrc, resultText, analysisText;
+
+        if (score < 40) {
+            imageSrc = catImages.poor;
+            resultText = this.translations[this.language].resultTexts.poor;
+            analysisText = this.translations[this.language].analysisTexts.poor;
+        } else if (score < 65) {
+            imageSrc = catImages.average;
+            resultText = this.translations[this.language].resultTexts.average;
+            analysisText = this.translations[this.language].analysisTexts.average;
+        } else if (score < 80) {
+            imageSrc = catImages.good;
+            resultText = this.translations[this.language].resultTexts.good;
+            analysisText = this.translations[this.language].analysisTexts.good;
+        } else if (score < 90) {
+            imageSrc = catImages.excellent;
+            resultText = this.translations[this.language].resultTexts.excellent;
+            analysisText = this.translations[this.language].analysisTexts.excellent;
+        } else {
+            imageSrc = catImages.perfect;
+            resultText = this.translations[this.language].resultTexts.perfect;
+            analysisText = this.translations[this.language].analysisTexts.perfect;
         }
+
+        this.resultImage = imageSrc;
+        this.resultText = resultText;
+        this.analysisText = analysisText;
+        this.showResult = true;
+
+        // 保存到历史记录
+        this.saveToHistory();
+
+    } catch (error) {
+        console.error('计算出错:', error);
+        this.resultText = "计算过程中出现错误，请检查输入值";
+        this.analysisText = error.message;
+        this.showResult = true;
+    }
+}
     },
     mounted() {
         const savedLang = localStorage.getItem('catTestLang')|| 'zh';
