@@ -1006,16 +1006,20 @@ new Vue({
 
         // 1. 经济成本计算
         const litterCost = litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50);
-        const annualCost = 
-            (monthlyFoodCost * 12 * (0.5 + foodGrade * 0.3)) +
-            (monthlySnackCost * 12 * (0.3 + snackGrade * 0.2)) +
-            ((vaccineCost + medicalCost) * (0.5 + insurance * 0.3)) +
-            (groomingCost * groomingFrequency * 12) +
-            (litterCost * 12) +
-            toyBudget;
-        
+
+        const annualFoodCost = (monthlyFoodCost + monthlySnackCost) * 12;
+        const annualMedicalCost = vaccineCost + 
+                                (insurance === 0.8 ? 500 : (insurance === 1.5 ? 1500 : 0)) + 
+                                medicalCost;
+        const litterCost = litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50);
+        const annualSuppliesCost = (litterCost * 12) + toyBudget + initialSupplies;
+        const annualGroomingCost = groomingCost * groomingFrequency * 12;
+        const annualCost = annualFoodCost + annualMedicalCost + annualSuppliesCost + annualGroomingCost;
         const costFactor = Math.min(100, (annualCost / 5000) * 100);
         const costScore = 30 - (costFactor * 0.3);
+
+        
+        
 
         // 2. 生活质量计算
         // 饮食质量 (0-15)
