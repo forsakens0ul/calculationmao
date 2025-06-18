@@ -575,18 +575,20 @@ resultTitle: "你的喵星人生活报告",
         groomingTitle: "美容护理",
         dailySuppliesTitle: "日常用品", interactionTitle: "互动情况",
         resultTexts: {
-                perfect: '🐱🌟 神仙喵生！你的猫咪生活性价比超高，简直是猫中贵族！',
-                excellent: '🐱💖 优质喵生！你和猫咪相处得很舒适，继续保持～',
-                good: '🐱👍 还不错！猫咪生活性价比尚可，但还有提升空间。',
-                average: '🐱😐 勉强及格！猫咪生活性价比一般，考虑优化养猫方式。',
-                poor: '🐱💔 惨不忍睹！猫咪生活性价比太低，建议重新规划养猫方案。'
+                cloudCat: '🐱☁️ 云养猫模式！虽然没有实体猫咪，但依然可以享受养猫的乐趣～',
+                poor: '🐱💔 养猫投入过高！建议优化支出结构，避免不必要的开销。',
+                average: '🐱😐 养猫投入偏高！建议合理控制支出，提高性价比。',
+                good: '🐱👍 养猫投入适中！继续保持合理的支出结构。',
+                excellent: '🐱💖 养猫投入合理！支出结构良好，性价比高。',
+                perfect: '🐱🌟 养猫投入最优！支出结构完美，性价比极高。'
             },
             analysisTexts: {
-                perfect: '完美平衡！您的猫咪过着奢侈生活而成本却控制得恰到好处。',
-                excellent: '您的猫咪享受着高品质生活而成本控制得当，非常棒！',
-                good: '您的猫咪生活质量和成本控制达到了较好的平衡！',
-                average: '您的养猫成本和生活质量处于中等水平，仍有优化空间。',
-                poor: '您的养猫成本较高而生活质量评分较低，建议优化开支结构或增加互动时间。'
+                cloudCat: '云养猫是一种特殊的养猫方式，虽然没有实体猫咪，但可以通过网络分享等方式参与养猫社区。',
+                poor: '您的养猫投入过高，建议：\n1. 控制主粮支出（每月200-300元即可）\n2. 合理规划医疗支出（每年1000-1500元）\n3. 减少不必要的美容支出\n4. 优化其他用品支出',
+                average: '您的养猫投入偏高，建议：\n1. 适当降低主粮档次（每月200-300元）\n2. 控制医疗支出（每年1000-1500元）\n3. 减少美容频率\n4. 精简其他用品支出',
+                good: '您的养猫投入适中，建议：\n1. 保持当前主粮投入（每月200-300元）\n2. 维持合理的医疗支出\n3. 适度进行美容护理\n4. 保持合理的用品支出',
+                excellent: '您的养猫投入合理，建议：\n1. 继续保持当前的主粮投入\n2. 维持必要的医疗支出\n3. 保持适度的美容护理\n4. 维持合理的用品支出',
+                perfect: '您的养猫投入最优，建议：\n1. 继续保持当前的高性价比投入\n2. 维持必要的医疗支出\n3. 保持适度的美容护理\n4. 维持合理的用品支出'
             }
     },
     en: {
@@ -1004,82 +1006,178 @@ new Vue({
         const catFurniture = parseFloat(document.getElementById('catFurniture').value);
         const cleanFrequency = parseFloat(document.getElementById('cleanFrequency').value);
 
-        // 1. 经济成本计算
-    
+        // 1. 经济成本计算 (0-80分)
+        const annualFoodCost = monthlyFoodCost * 12;
+        const annualSnackCost = monthlySnackCost * 12;
+        const annualMedicalCost = vaccineCost + (insurance === 0.8 ? 500 : (insurance === 1.5 ? 1500 : 0)) + medicalCost;
+        const annualGroomingCost = groomingCost * groomingFrequency * 12;
+        const annualLitterCost = (litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50)) * 12;
+        const annualToyCost = toyBudget;
+        
+        const totalAnnualCost = annualFoodCost + annualSnackCost + annualMedicalCost + 
+                              annualGroomingCost + annualLitterCost + annualToyCost;
 
+        // 计算各项投入占比
+        const foodRatio = annualFoodCost / totalAnnualCost;
+        const medicalRatio = annualMedicalCost / totalAnnualCost;
+        const groomingRatio = annualGroomingCost / totalAnnualCost;
+        const otherRatio = (annualLitterCost + annualToyCost) / totalAnnualCost;
         
-        const litterCost = litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50);
-        const annualCost = 
-            (monthlyFoodCost * 12 * (0.5 + foodGrade * 0.3)) +
-            (monthlySnackCost * 12 * (0.3 + snackGrade * 0.2)) +
-            ((vaccineCost + medicalCost) * (0.5 + insurance * 0.3)) +
-            (groomingCost * groomingFrequency * 12) +
-            (litterCost * 12) +
-            toyBudget;
-        
-        const costFactor = Math.min(100, (annualCost / 5000) * 100);
-        const costScore = 30 - (costFactor * 0.3);
+        // 成本评分：根据投入的性价比评分
+        let costScore = 0;
+        if (catType === '0') { // 云养猫
+            costScore = 60; // 云养猫基础分
+        } else {
+            // 基础分：根据总成本的性价比（0-70分）
+            let baseScore = 0;
+            if (totalAnnualCost < 1000) {
+                baseScore = 70; // 投入很低，性价比最高
+            } else if (totalAnnualCost < 1500) {
+                baseScore = 60; // 投入适中，性价比高
+            } else if (totalAnnualCost < 2000) {
+                baseScore = 50; // 投入偏高，性价比开始降低
+            } else if (totalAnnualCost < 3000) {
+                baseScore = 40; // 投入较高，性价比降低
+            } else if (totalAnnualCost < 4000) {
+                baseScore = 30; // 投入高，性价比很低
+            } else if (totalAnnualCost < 5000) {
+                baseScore = 20; // 投入过高，性价比极低
+            } else {
+                baseScore = 10; // 投入极高，性价比极低
+            }
 
-        // 2. 生活质量计算
-        // 饮食质量 (0-15)
-        const dietScore = Math.min(15, 
-            (foodGrade * 5) + 
-            (snackGrade * 2) + 
-            (monthlyFoodCost / 50)
+            // 结构分：根据投入结构合理性（0-10分）
+            let structureScore = 0;
+            
+            // 主粮投入评分（0-4分）
+            if (foodRatio >= 0.4 && foodRatio <= 0.6) {
+                structureScore += 4; // 主粮投入合理
+            } else if (foodRatio > 0.6) {
+                structureScore += 1; // 主粮投入过高
+            } else if (foodRatio >= 0.3) {
+                structureScore += 3; // 主粮投入偏低
+            } else {
+                structureScore += 1; // 主粮投入过低
+            }
+
+            // 医疗投入评分（0-3分）
+            if (medicalRatio >= 0.1 && medicalRatio <= 0.2) {
+                structureScore += 3; // 医疗投入合理
+            } else if (medicalRatio > 0.2) {
+                structureScore += 1; // 医疗投入过高
+            } else if (medicalRatio >= 0.05) {
+                structureScore += 2; // 医疗投入偏低
+            } else {
+                structureScore += 1; // 医疗投入过低
+            }
+
+            // 其他投入评分（0-3分）
+            if (otherRatio >= 0.1 && otherRatio <= 0.2) {
+                structureScore += 3; // 其他投入合理
+            } else if (otherRatio > 0.2) {
+                structureScore += 1; // 其他投入过高
+            } else if (otherRatio >= 0.05) {
+                structureScore += 2; // 其他投入偏低
+            } else {
+                structureScore += 1; // 其他投入过低
+            }
+
+            costScore = baseScore + structureScore;
+        }
+
+        // 2. 生活质量计算 (0-10分)
+        // 饮食质量 (0-3分)
+        const dietScore = Math.min(3, 
+            (foodGrade * 0.5) + // 主粮等级 (0-1.5分)
+            (snackGrade * 0.3) + // 零食等级 (0-0.9分)
+            (monthlyFoodCost / 500) // 主粮投入 (0-0.6分)
         );
         
-        // 医疗健康 (0-10)
-        const healthScore = Math.min(10,
-            (vaccineCost / 100) + 
-            (medicalCost / 500) + 
-            (insurance * 3)
+        // 医疗健康 (0-2分)
+        const healthScore = Math.min(2,
+            (vaccineCost / 1000) + // 疫苗投入 (0-0.6分)
+            (medicalCost / 2000) + // 医疗投入 (0-0.6分)
+            (insurance * 0.4) // 保险等级 (0-0.8分)
         );
         
-        // 生活环境 (0-15)
-        const livingScore = Math.min(15,
-            (livingSpace * 3) + 
-            (catFurniture * 4) + 
-            (cleanFrequency * 2) + 
-            (litterGrade * 1)
+        // 生活环境 (0-3分)
+        const livingScore = Math.min(3,
+            (livingSpace * 0.4) + // 居住空间 (0-0.8分)
+            (catFurniture * 0.4) + // 猫家具 (0-0.8分)
+            (cleanFrequency * 0.6) + // 清洁频率 (0-1.2分)
+            (litterGrade * 0.2) // 猫砂等级 (0-0.4分)
         );
         
-        // 互动质量 (0-10)
-        const interactionScore = Math.min(10,
-            (dailyInteraction * 2) + 
-            (interactionQuality * 3) + 
-            (catMood * 1)
+        // 互动质量 (0-2分)
+        const interactionScore = Math.min(2,
+            (dailyInteraction * 0.4) + // 互动时间 (0-1.2分)
+            (interactionQuality * 0.4) + // 互动质量 (0-0.8分)
+            (catMood * 0.2) // 猫咪性格 (0-0.4分)
         );
         
         const livingQualityScore = dietScore + healthScore + livingScore + interactionScore;
 
-        // 3. 特殊因素计算
+        // 3. 特殊因素计算 (0-10分)
+        // 品种因素 (0-3分)
         const breedFactors = {
-            '0': 1, '1.0': 3, '1.2': 4, '1.5': 4, '1.8': 5, 
-            '1.7': 4, '1.3': 4, '2.0': 5, '2.2': 5, '2.5': 5, '3.0': 5
+            '0': 0,  // 云养猫
+            '1.0': 1, // 中华田园猫
+            '1.2': 2, // 英短
+            '1.5': 2, // 美短
+            '1.8': 3, // 布偶
+            '1.7': 2, // 暹罗
+            '1.3': 2, // 折耳
+            '2.0': 3, // 缅因
+            '2.2': 3, // 挪威森林
+            '2.5': 3, // 孟加拉
+            '3.0': 3  // 萨凡纳
         };
-        const ageFactors = {'1.2': 4, '1.0': 5, '0.8': 3};
-        const genderFactors = {'1.0': 5, '1.1': 3, '1.2': 4};
-        const moodFactors = {'0.8': 3, '1.0': 5, '1.2': 4, '0.6': 2};
+
+        // 年龄因素 (0-2分)
+        const ageFactors = {
+            '1.2': 1, // 幼猫
+            '1.0': 2, // 成猫
+            '0.8': 1  // 老年猫
+        };
+
+        // 性别因素 (0-2分)
+        const genderFactors = {
+            '1.0': 2, // 已绝育
+            '1.1': 1, // 未绝育公猫
+            '1.2': 1  // 未绝育母猫
+        };
+
+        // 性格因素 (0-3分)
+        const moodFactors = {
+            '0.8': 1, // 高冷
+            '1.0': 2, // 普通
+            '1.2': 3, // 粘人
+            '0.6': 1  // 拆家
+        };
         
         const specialScore = 
-            (breedFactors[catType] || 3) + 
-            (ageFactors[catAge] || 4) + 
-            (genderFactors[catGender] || 4) + 
-            (moodFactors[catMood] || 4);
+            (breedFactors[catType] || 1) + 
+            (ageFactors[catAge] || 1) + 
+            (genderFactors[catGender] || 1) + 
+            (moodFactors[catMood] || 1);
 
-        // 4. 总分计算 (基础分30 + 各项得分)
+        // 4. 总分计算
         this.score = Math.min(100, Math.max(0,
-            30 + // 基础分
-            costScore + // 经济成本(0-30)
-            livingQualityScore * 0.5 + // 生活质量(0-50)
-            specialScore // 特殊因素(0-20)
+            costScore + // 经济成本(0-80)
+            livingQualityScore + // 生活质量(0-10)
+            specialScore // 特殊因素(0-10)
         )).toFixed(1);
 
         // 5. 结果分级
         const score = parseFloat(this.score);
         let imageSrc, resultText, analysisText;
 
-        if (score < 40) {
+        if (catType === '0') {
+            // 云养猫特殊处理
+            imageSrc = catImages.average;
+            resultText = this.translations[this.language].resultTexts.cloudCat;
+            analysisText = this.translations[this.language].analysisTexts.cloudCat;
+        } else if (score < 40) {
             imageSrc = catImages.poor;
             resultText = this.translations[this.language].resultTexts.poor;
             analysisText = this.translations[this.language].analysisTexts.poor;
@@ -1108,17 +1206,13 @@ new Vue({
         this.showResult = true;
 
         // 保存年度成本明细
-        this.annualFoodCost = ((monthlyFoodCost + monthlySnackCost) * 12).toFixed(0);
-        this.annualSnackCost = (monthlySnackCost * 12 * (0.3 + snackGrade * 0.2)).toFixed(0);
-        this.annualMedicalCost = (vaccineCost + 
-                                (insurance === 0.8 ? 500 : (insurance === 1.5 ? 1500 : 0)) + 
-                                medicalCost).toFixed(0);
-        this.annualGroomingCost = (groomingCost * groomingFrequency * 12).toFixed(0);
-        this.annualLitterCost = (litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50)).toFixed(0);
+        this.annualFoodCost = annualFoodCost.toFixed(0);
+        this.annualMedicalCost = annualMedicalCost.toFixed(0);
+        this.annualGroomingCost = annualGroomingCost.toFixed(0);
+        this.annualLitterCost = annualLitterCost.toFixed(0);
         this.toyBudget = toyBudget;
-        
         this.initialCost = purchaseCost + initialSupplies;
-        this.othercost=this.annualLitterCost*12+ this.toyBudget;
+        this.othercost = (parseFloat(annualLitterCost) + parseFloat(toyBudget)).toFixed(0);
 
         // 保存到历史记录
         this.saveToHistory();
