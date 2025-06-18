@@ -4,6 +4,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>喵星人生活性价比计算器Pro</title>
+    <!-- Google Analytics 4 -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-XXXXXXXXXX"></script>
+    <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'G-XXXXXXXXXX');
+    </script>
     <!-- 添加 Font Awesome 图标库 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/vue@2.6.14/dist/vue.js"></script>
@@ -870,10 +878,19 @@ new Vue({
         annualGroomingCost: 0,
         annualLitterCost: 0,
         toyBudget: 0,
-        initialCost: 0
+        initialCost: 0,
+        // 新增访问统计相关数据
+        lastVisitTime: null,
+        visitorId: null
     },
     methods: {
         shareResult() {
+            // 跟踪分享事件
+            this.trackEvent('share_result', {
+                'score': this.score,
+                'result_type': this.getResultType()
+            });
+            
             const shareText = `${this.translations[this.language].resultTitle}: ${this.score}${this.translations[this.language].scoreUnit} - ${this.resultText}`;
             if (navigator.share) {
                 navigator.share({
@@ -924,28 +941,83 @@ new Vue({
             this.showResult = true;
         },
 
-        recordVisit() {
-            const visitorId = this.getVisitorId();
-            const lastVisit = localStorage.getItem('lastVisit');
+        // 更新访问统计方法
+        async updateVisitStats() {
+            try {
+                // 发送访问事件到后端
+                await fetch('/api/analytics', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        event: 'page_view',
+                        data: {
+                            page_title: '喵星人生活性价比计算器Pro',
+                            page_location: window.location.href,
+                            page_path: window.location.pathname
+                        }
+                    })
+                });
+
+                // 保留本地统计作为备份
             const now = new Date().getTime();
+                const lastVisit = localStorage.getItem('lastVisitTime');
+                const visitorId = localStorage.getItem('visitorId');
+                
+                if (!visitorId) {
+                    const newVisitorId = 'visitor_' + Math.random().toString(36).substr(2, 9);
+                    localStorage.setItem('visitorId', newVisitorId);
+                    this.visitorId = newVisitorId;
+                    
+                    const currentVisitors = parseInt(localStorage.getItem('visitorCount') || '0');
+                    localStorage.setItem('visitorCount', currentVisitors + 1);
+                    this.visitorCount = currentVisitors + 1;
+                } else {
+                    this.visitorId = visitorId;
+                }
+                
+                const currentVisits = parseInt(localStorage.getItem('visitCount') || '0');
+                localStorage.setItem('visitCount', currentVisits + 1);
+                this.visitCount = currentVisits + 1;
+                
+                localStorage.setItem('lastVisitTime', now);
+                this.lastVisitTime = now;
             
-            this.visitCount = parseInt(localStorage.getItem('visitCount') || 0) + 1;
-            localStorage.setItem('visitCount', this.visitCount);
-            
-            if (!lastVisit || (now - lastVisit) > 24 * 60 * 60 * 1000) {
-                this.visitorCount = parseInt(localStorage.getItem('visitorCount') || 0) + 1;
-                localStorage.setItem('visitorCount', this.visitorCount);
-                localStorage.setItem('lastVisit', now);
+                if (!lastVisit || (now - parseInt(lastVisit)) > 24 * 60 * 60 * 1000) {
+                    const currentVisitors = parseInt(localStorage.getItem('visitorCount') || '0');
+                    localStorage.setItem('visitorCount', currentVisitors + 1);
+                    this.visitorCount = currentVisitors + 1;
+                }
+            } catch (error) {
+                console.error('统计更新失败:', error);
             }
         },
 
-        getVisitorId() {
-            let visitorId = localStorage.getItem('visitorId');
-            if (!visitorId) {
-                visitorId = 'visitor-' + Math.random().toString(36).substr(2, 9);
-                localStorage.setItem('visitorId', visitorId);
+        // 添加自定义事件跟踪
+        async trackEvent(eventName, eventParams = {}) {
+            try {
+                await fetch('/api/analytics', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({
+                        event: eventName,
+                        data: eventParams
+                    })
+                });
+            } catch (error) {
+                console.error('事件跟踪失败:', error);
             }
-            return visitorId;
+        },
+
+        // 加载访问统计
+        loadVisitStats() {
+            this.visitCount = parseInt(localStorage.getItem('visitCount') || '0');
+            this.visitorCount = parseInt(localStorage.getItem('visitorCount') || '0');
+            this.lastVisitTime = localStorage.getItem('lastVisitTime');
+            this.visitorId = localStorage.getItem('visitorId');
         },
 
         loadStats() {
@@ -981,6 +1053,12 @@ new Vue({
         },
 
     calculate() {
+            // 跟踪计算事件
+            this.trackEvent('calculate_score', {
+                'cat_type': document.getElementById('catType').value,
+                'total_cost': this.calculateTotalCost()
+            });
+            
     try {
         // 获取所有输入值
         const catType = document.getElementById('catType').value;
@@ -1006,178 +1084,178 @@ new Vue({
         const catFurniture = parseFloat(document.getElementById('catFurniture').value);
         const cleanFrequency = parseFloat(document.getElementById('cleanFrequency').value);
 
-        // 1. 经济成本计算 (0-80分)
-        const annualFoodCost = monthlyFoodCost * 12;
-        const annualSnackCost = monthlySnackCost * 12;
-        const annualMedicalCost = vaccineCost + (insurance === 0.8 ? 500 : (insurance === 1.5 ? 1500 : 0)) + medicalCost;
-        const annualGroomingCost = groomingCost * groomingFrequency * 12;
-        const annualLitterCost = (litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50)) * 12;
-        const annualToyCost = toyBudget;
-        
-        const totalAnnualCost = annualFoodCost + annualSnackCost + annualMedicalCost + 
-                              annualGroomingCost + annualLitterCost + annualToyCost;
+                // 1. 经济成本计算 (0-80分)
+                const annualFoodCost = monthlyFoodCost * 12;
+                const annualSnackCost = monthlySnackCost * 12;
+                const annualMedicalCost = vaccineCost + (insurance === 0.8 ? 500 : (insurance === 1.5 ? 1500 : 0)) + medicalCost;
+                const annualGroomingCost = groomingCost * groomingFrequency * 12;
+                const annualLitterCost = (litterGrade === 0.5 ? 10 : (litterGrade === 1.0 ? 30 : 50)) * 12;
+                const annualToyCost = toyBudget;
+                
+                const totalAnnualCost = annualFoodCost + annualSnackCost + annualMedicalCost + 
+                                      annualGroomingCost + annualLitterCost + annualToyCost;
 
-        // 计算各项投入占比
-        const foodRatio = annualFoodCost / totalAnnualCost;
-        const medicalRatio = annualMedicalCost / totalAnnualCost;
-        const groomingRatio = annualGroomingCost / totalAnnualCost;
-        const otherRatio = (annualLitterCost + annualToyCost) / totalAnnualCost;
-        
-        // 成本评分：根据投入的性价比评分
-        let costScore = 0;
-        if (catType === '0') { // 云养猫
-            costScore = 60; // 云养猫基础分
-        } else {
-            // 基础分：根据总成本的性价比（0-70分）
-            let baseScore = 0;
-            if (totalAnnualCost < 1000) {
-                baseScore = 70; // 投入很低，性价比最高
-            } else if (totalAnnualCost < 1500) {
-                baseScore = 60; // 投入适中，性价比高
-            } else if (totalAnnualCost < 2000) {
-                baseScore = 50; // 投入偏高，性价比开始降低
-            } else if (totalAnnualCost < 3000) {
-                baseScore = 40; // 投入较高，性价比降低
-            } else if (totalAnnualCost < 4000) {
-                baseScore = 30; // 投入高，性价比很低
-            } else if (totalAnnualCost < 5000) {
-                baseScore = 20; // 投入过高，性价比极低
-            } else {
-                baseScore = 10; // 投入极高，性价比极低
-            }
+                // 计算各项投入占比
+                const foodRatio = annualFoodCost / totalAnnualCost;
+                const medicalRatio = annualMedicalCost / totalAnnualCost;
+                const groomingRatio = annualGroomingCost / totalAnnualCost;
+                const otherRatio = (annualLitterCost + annualToyCost) / totalAnnualCost;
+                
+                // 成本评分：根据投入的性价比评分
+                let costScore = 0;
+                if (catType === '0') { // 云养猫
+                    costScore = 60; // 云养猫基础分
+                } else {
+                    // 基础分：根据总成本的性价比（0-70分）
+                    let baseScore = 0;
+                    if (totalAnnualCost < 1000) {
+                        baseScore = 70; // 投入很低，性价比最高
+                    } else if (totalAnnualCost < 1500) {
+                        baseScore = 60; // 投入适中，性价比高
+                    } else if (totalAnnualCost < 2000) {
+                        baseScore = 50; // 投入偏高，性价比开始降低
+                    } else if (totalAnnualCost < 3000) {
+                        baseScore = 40; // 投入较高，性价比降低
+                    } else if (totalAnnualCost < 4000) {
+                        baseScore = 30; // 投入高，性价比很低
+                    } else if (totalAnnualCost < 5000) {
+                        baseScore = 20; // 投入过高，性价比极低
+                    } else {
+                        baseScore = 10; // 投入极高，性价比极低
+                    }
 
-            // 结构分：根据投入结构合理性（0-10分）
-            let structureScore = 0;
-            
-            // 主粮投入评分（0-4分）
-            if (foodRatio >= 0.4 && foodRatio <= 0.6) {
-                structureScore += 4; // 主粮投入合理
-            } else if (foodRatio > 0.6) {
-                structureScore += 1; // 主粮投入过高
-            } else if (foodRatio >= 0.3) {
-                structureScore += 3; // 主粮投入偏低
-            } else {
-                structureScore += 1; // 主粮投入过低
-            }
+                    // 结构分：根据投入结构合理性（0-10分）
+                    let structureScore = 0;
+                    
+                    // 主粮投入评分（0-4分）
+                    if (foodRatio >= 0.4 && foodRatio <= 0.6) {
+                        structureScore += 4; // 主粮投入合理
+                    } else if (foodRatio > 0.6) {
+                        structureScore += 1; // 主粮投入过高
+                    } else if (foodRatio >= 0.3) {
+                        structureScore += 3; // 主粮投入偏低
+                    } else {
+                        structureScore += 1; // 主粮投入过低
+                    }
 
-            // 医疗投入评分（0-3分）
-            if (medicalRatio >= 0.1 && medicalRatio <= 0.2) {
-                structureScore += 3; // 医疗投入合理
-            } else if (medicalRatio > 0.2) {
-                structureScore += 1; // 医疗投入过高
-            } else if (medicalRatio >= 0.05) {
-                structureScore += 2; // 医疗投入偏低
-            } else {
-                structureScore += 1; // 医疗投入过低
-            }
+                    // 医疗投入评分（0-3分）
+                    if (medicalRatio >= 0.1 && medicalRatio <= 0.2) {
+                        structureScore += 3; // 医疗投入合理
+                    } else if (medicalRatio > 0.2) {
+                        structureScore += 1; // 医疗投入过高
+                    } else if (medicalRatio >= 0.05) {
+                        structureScore += 2; // 医疗投入偏低
+                    } else {
+                        structureScore += 1; // 医疗投入过低
+                    }
 
-            // 其他投入评分（0-3分）
-            if (otherRatio >= 0.1 && otherRatio <= 0.2) {
-                structureScore += 3; // 其他投入合理
-            } else if (otherRatio > 0.2) {
-                structureScore += 1; // 其他投入过高
-            } else if (otherRatio >= 0.05) {
-                structureScore += 2; // 其他投入偏低
-            } else {
-                structureScore += 1; // 其他投入过低
-            }
+                    // 其他投入评分（0-3分）
+                    if (otherRatio >= 0.1 && otherRatio <= 0.2) {
+                        structureScore += 3; // 其他投入合理
+                    } else if (otherRatio > 0.2) {
+                        structureScore += 1; // 其他投入过高
+                    } else if (otherRatio >= 0.05) {
+                        structureScore += 2; // 其他投入偏低
+                    } else {
+                        structureScore += 1; // 其他投入过低
+                    }
 
-            costScore = baseScore + structureScore;
-        }
+                    costScore = baseScore + structureScore;
+                }
 
-        // 2. 生活质量计算 (0-10分)
-        // 饮食质量 (0-3分)
-        const dietScore = Math.min(3, 
-            (foodGrade * 0.5) + // 主粮等级 (0-1.5分)
-            (snackGrade * 0.3) + // 零食等级 (0-0.9分)
-            (monthlyFoodCost / 500) // 主粮投入 (0-0.6分)
+                // 2. 生活质量计算 (0-10分)
+                // 饮食质量 (0-3分)
+                const dietScore = Math.min(3, 
+                    (foodGrade * 0.5) + // 主粮等级 (0-1.5分)
+                    (snackGrade * 0.3) + // 零食等级 (0-0.9分)
+                    (monthlyFoodCost / 500) // 主粮投入 (0-0.6分)
         );
         
-        // 医疗健康 (0-2分)
-        const healthScore = Math.min(2,
-            (vaccineCost / 1000) + // 疫苗投入 (0-0.6分)
-            (medicalCost / 2000) + // 医疗投入 (0-0.6分)
-            (insurance * 0.4) // 保险等级 (0-0.8分)
+                // 医疗健康 (0-2分)
+                const healthScore = Math.min(2,
+                    (vaccineCost / 1000) + // 疫苗投入 (0-0.6分)
+                    (medicalCost / 2000) + // 医疗投入 (0-0.6分)
+                    (insurance * 0.4) // 保险等级 (0-0.8分)
         );
         
-        // 生活环境 (0-3分)
-        const livingScore = Math.min(3,
-            (livingSpace * 0.4) + // 居住空间 (0-0.8分)
-            (catFurniture * 0.4) + // 猫家具 (0-0.8分)
-            (cleanFrequency * 0.6) + // 清洁频率 (0-1.2分)
-            (litterGrade * 0.2) // 猫砂等级 (0-0.4分)
+                // 生活环境 (0-3分)
+                const livingScore = Math.min(3,
+                    (livingSpace * 0.4) + // 居住空间 (0-0.8分)
+                    (catFurniture * 0.4) + // 猫家具 (0-0.8分)
+                    (cleanFrequency * 0.6) + // 清洁频率 (0-1.2分)
+                    (litterGrade * 0.2) // 猫砂等级 (0-0.4分)
         );
         
-        // 互动质量 (0-2分)
-        const interactionScore = Math.min(2,
-            (dailyInteraction * 0.4) + // 互动时间 (0-1.2分)
-            (interactionQuality * 0.4) + // 互动质量 (0-0.8分)
-            (catMood * 0.2) // 猫咪性格 (0-0.4分)
+                // 互动质量 (0-2分)
+                const interactionScore = Math.min(2,
+                    (dailyInteraction * 0.4) + // 互动时间 (0-1.2分)
+                    (interactionQuality * 0.4) + // 互动质量 (0-0.8分)
+                    (catMood * 0.2) // 猫咪性格 (0-0.4分)
         );
         
         const livingQualityScore = dietScore + healthScore + livingScore + interactionScore;
 
-        // 3. 特殊因素计算 (0-10分)
-        // 品种因素 (0-3分)
+                // 3. 特殊因素计算 (0-10分)
+                // 品种因素 (0-3分)
         const breedFactors = {
-            '0': 0,  // 云养猫
-            '1.0': 1, // 中华田园猫
-            '1.2': 2, // 英短
-            '1.5': 2, // 美短
-            '1.8': 3, // 布偶
-            '1.7': 2, // 暹罗
-            '1.3': 2, // 折耳
-            '2.0': 3, // 缅因
-            '2.2': 3, // 挪威森林
-            '2.5': 3, // 孟加拉
-            '3.0': 3  // 萨凡纳
+                    '0': 0,  // 云养猫
+                    '1.0': 1, // 中华田园猫
+                    '1.2': 2, // 英短
+                    '1.5': 2, // 美短
+                    '1.8': 3, // 布偶
+                    '1.7': 2, // 暹罗
+                    '1.3': 2, // 折耳
+                    '2.0': 3, // 缅因
+                    '2.2': 3, // 挪威森林
+                    '2.5': 3, // 孟加拉
+                    '3.0': 3  // 萨凡纳
         };
 
-        // 年龄因素 (0-2分)
-        const ageFactors = {
-            '1.2': 1, // 幼猫
-            '1.0': 2, // 成猫
-            '0.8': 1  // 老年猫
-        };
+                // 年龄因素 (0-2分)
+                const ageFactors = {
+                    '1.2': 1, // 幼猫
+                    '1.0': 2, // 成猫
+                    '0.8': 1  // 老年猫
+                };
 
-        // 性别因素 (0-2分)
-        const genderFactors = {
-            '1.0': 2, // 已绝育
-            '1.1': 1, // 未绝育公猫
-            '1.2': 1  // 未绝育母猫
-        };
+                // 性别因素 (0-2分)
+                const genderFactors = {
+                    '1.0': 2, // 已绝育
+                    '1.1': 1, // 未绝育公猫
+                    '1.2': 1  // 未绝育母猫
+                };
 
-        // 性格因素 (0-3分)
-        const moodFactors = {
-            '0.8': 1, // 高冷
-            '1.0': 2, // 普通
-            '1.2': 3, // 粘人
-            '0.6': 1  // 拆家
-        };
+                // 性格因素 (0-3分)
+                const moodFactors = {
+                    '0.8': 1, // 高冷
+                    '1.0': 2, // 普通
+                    '1.2': 3, // 粘人
+                    '0.6': 1  // 拆家
+                };
         
         const specialScore = 
-            (breedFactors[catType] || 1) + 
-            (ageFactors[catAge] || 1) + 
-            (genderFactors[catGender] || 1) + 
-            (moodFactors[catMood] || 1);
+                    (breedFactors[catType] || 1) + 
+                    (ageFactors[catAge] || 1) + 
+                    (genderFactors[catGender] || 1) + 
+                    (moodFactors[catMood] || 1);
 
-        // 4. 总分计算
+                // 4. 总分计算
         this.score = Math.min(100, Math.max(0,
-            costScore + // 经济成本(0-80)
-            livingQualityScore + // 生活质量(0-10)
-            specialScore // 特殊因素(0-10)
+                    costScore + // 经济成本(0-80)
+                    livingQualityScore + // 生活质量(0-10)
+                    specialScore // 特殊因素(0-10)
         )).toFixed(1);
 
         // 5. 结果分级
         const score = parseFloat(this.score);
         let imageSrc, resultText, analysisText;
 
-        if (catType === '0') {
-            // 云养猫特殊处理
-            imageSrc = catImages.average;
-            resultText = this.translations[this.language].resultTexts.cloudCat;
-            analysisText = this.translations[this.language].analysisTexts.cloudCat;
-        } else if (score < 40) {
+                if (catType === '0') {
+                    // 云养猫特殊处理
+                    imageSrc = catImages.average;
+                    resultText = this.translations[this.language].resultTexts.cloudCat;
+                    analysisText = this.translations[this.language].analysisTexts.cloudCat;
+                } else if (score < 40) {
             imageSrc = catImages.poor;
             resultText = this.translations[this.language].resultTexts.poor;
             analysisText = this.translations[this.language].analysisTexts.poor;
@@ -1206,13 +1284,13 @@ new Vue({
         this.showResult = true;
 
         // 保存年度成本明细
-        this.annualFoodCost = annualFoodCost.toFixed(0);
-        this.annualMedicalCost = annualMedicalCost.toFixed(0);
-        this.annualGroomingCost = annualGroomingCost.toFixed(0);
-        this.annualLitterCost = annualLitterCost.toFixed(0);
+                this.annualFoodCost = annualFoodCost.toFixed(0);
+                this.annualMedicalCost = annualMedicalCost.toFixed(0);
+                this.annualGroomingCost = annualGroomingCost.toFixed(0);
+                this.annualLitterCost = annualLitterCost.toFixed(0);
         this.toyBudget = toyBudget;
         this.initialCost = purchaseCost + initialSupplies;
-        this.othercost = (parseFloat(annualLitterCost) + parseFloat(toyBudget)).toFixed(0);
+                this.othercost = (parseFloat(annualLitterCost) + parseFloat(toyBudget)).toFixed(0);
 
         // 保存到历史记录
         this.saveToHistory();
@@ -1223,19 +1301,41 @@ new Vue({
         this.analysisText = error.message;
         this.showResult = true;
     }
-}
-    },
+        },
+
+        // 辅助方法：计算总成本
+        calculateTotalCost() {
+            const monthlyFoodCost = parseFloat(document.getElementById('monthlyFoodCost').value) || 0;
+            const monthlySnackCost = parseFloat(document.getElementById('monthlySnackCost').value) || 0;
+            const medicalCost = parseFloat(document.getElementById('medicalCost').value) || 0;
+            const groomingCost = parseFloat(document.getElementById('groomingCost').value) || 0;
+            const toyBudget = parseFloat(document.getElementById('toyBudget').value) || 0;
+            
+            return (monthlyFoodCost + monthlySnackCost) * 12 + medicalCost + groomingCost + toyBudget;
+        },
+
+        // 辅助方法：获取结果类型
+        getResultType() {
+            const score = parseFloat(this.score);
+            if (score < 40) return 'poor';
+            if (score < 60) return 'average';
+            if (score < 80) return 'good';
+            if (score < 90) return 'excellent';
+            return 'perfect';
+        },
+
     mounted() {
-        const savedLang = localStorage.getItem('catTestLang')|| 'zh';
-       
+            const savedLang = localStorage.getItem('catTestLang') || 'zh';
         this.language = savedLang;
-        
         
         this.$nextTick(() => {
         this.updatePageLanguage();
     });
-    this.loadStats();
-        this.recordVisit(); 
+            
+            // 加载访问统计
+            this.loadVisitStats();
+            // 更新访问统计
+            this.updateVisitStats();
     },
     watch: {
         language(newLang) {
